@@ -4,6 +4,7 @@
 *.dll
 *.so
 *.html
+*.pdb
 
 build/
 out/

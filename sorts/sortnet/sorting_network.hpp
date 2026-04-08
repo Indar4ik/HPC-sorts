@@ -1196,7 +1196,7 @@ inline constexpr void sort64(int* a) noexcept {
     cmp(a[3], a[4]); cmp(a[7], a[8]); cmp(a[11], a[12]); cmp(a[13], a[14]); cmp(a[15], a[16]); cmp(a[17], a[18]); cmp(a[19], a[20]); cmp(a[21], a[22]); cmp(a[23], a[24]); cmp(a[25], a[26]); cmp(a[27], a[28]); cmp(a[29], a[30]); cmp(a[31], a[32]); cmp(a[33], a[34]); cmp(a[35], a[36]); cmp(a[37], a[38]); cmp(a[39], a[40]); cmp(a[41], a[42]); cmp(a[43], a[44]); cmp(a[45], a[46]); cmp(a[47], a[48]); cmp(a[49], a[50]); cmp(a[51], a[52]); cmp(a[55], a[56]); cmp(a[59], a[60]);
 }
 
-inline constexpr void network_srt(int* a, size_t& len) noexcept {
+inline constexpr void network_sort(int* a, size_t& len) noexcept {
     switch(len){
         case 0: case 1: return;
         case 2: cmp(a[0], a[1]); return;
