@@ -3,9 +3,9 @@
 *.obj
 *.dll
 *.so
-*.html
 *.pdb
 
+sorts/sortnet/*.html
 build/
 out/
 .vscode/
