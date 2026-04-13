@@ -5,7 +5,7 @@
 #include <print>
 #include <random>
 #include <vector>
-#include "sorts/merge_sort.hpp"
+#include "sorts/blockquick_sort.hpp"
 
 int main(){
     constexpr size_t ARR_SIZE = 16777216;
@@ -19,7 +19,7 @@ int main(){
 
     const auto start1 = std::chrono::steady_clock::now();
     
-    merge_sort(arr);
+    quick_sort(arr);
     
     const auto end1 = std::chrono::steady_clock::now();
 
