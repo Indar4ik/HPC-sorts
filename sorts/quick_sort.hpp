@@ -15,6 +15,7 @@
 //     }
 // }
 
+[[gnu::hot]]
 int* partition(int* first, int* last) noexcept{
     const int* const mid = first + (last - first) / 2;
     const int a = *first, b = *mid, c = *(last - 1);
@@ -37,7 +38,7 @@ int* partition(int* first, int* last) noexcept{
     }
 }
 
-void quick_sort_impl(int* first, int* last) noexcept{
+void quick_sort_impl(int* __restrict first, int* __restrict last) noexcept{
     while (last - first > 64) {
         int* p = partition(first, last);
         
