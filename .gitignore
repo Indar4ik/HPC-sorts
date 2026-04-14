@@ -4,8 +4,13 @@
 *.dll
 *.so
 *.pdb
-*
+main
+main_clang
+main_gcc
 
+sorts/radix_16-16.hpp
+sorts/radix_10-11-11.hpp
+sorts/quick_branchless_lomuto.hpp
 sorts/sortnet/*.html
 build/
 out/
