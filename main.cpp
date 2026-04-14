@@ -7,6 +7,11 @@
 #include <vector>
 #include "sorts/blockquick_sort.hpp"
 
+// std::sort - 1005 ms
+// quick_sort - 875 ms
+// merge_sort - 770 ms
+// blockquick_sort - 310 ms
+// radix_sort - 95 ms
 int main(){
     constexpr size_t ARR_SIZE = 16777216;
     std::vector<int> arr(ARR_SIZE);
