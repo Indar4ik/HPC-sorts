@@ -4,6 +4,7 @@
 *.dll
 *.so
 *.pdb
+*
 
 sorts/sortnet/*.html
 build/
