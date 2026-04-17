@@ -7,6 +7,8 @@
 main
 main_clang
 main_gcc
+main_icpx
+compile_flags.txt
 
 sorts/radix_16-16.hpp
 sorts/radix_10-11-11.hpp
