@@ -1,14 +1,12 @@
 #include <algorithm>
-// #include <array>
 #include <chrono>
-// #include <numeric>
 #include <print>
 #include <random>
 #include <vector>
 #include "sorts/blockquick_sort.hpp"
 
 // std::sort - 1005 ms
-// quick_sort - 875 ms
+// quick_sort (branchless hoar) - 875 ms
 // merge_sort - 770 ms
 // blockquick_sort - 310 ms
 // radix_sort - 95 ms

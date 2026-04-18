@@ -4,10 +4,9 @@
 *.dll
 *.so
 *.pdb
-main
-main_clang
-main_gcc
-main_icpx
+*_clang
+*_gcc
+*_icpx
 compile_flags.txt
 
 sorts/radix_16-16.hpp
