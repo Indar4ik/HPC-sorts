@@ -22,7 +22,7 @@ int main(){
 
     const auto start1 = std::chrono::steady_clock::now();
     
-    quick_sort(arr);
+    blockquick_sort(arr);
     
     const auto end1 = std::chrono::steady_clock::now();
 

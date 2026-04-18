@@ -84,7 +84,7 @@ static int* block_partition(int* __restrict first, int* __restrict last) noexcep
     return pivot_pos;
 }
 
-inline void quick_sort(std::span<int> arr) noexcept {
+inline void blockquick_sort(std::span<int> arr) noexcept {
     int* first = arr.data();
     int* last = first + arr.size();
     
@@ -93,10 +93,10 @@ inline void quick_sort(std::span<int> arr) noexcept {
         
         // Оптимизация хвостовой рекурсии (защита стека)
         if (p - first < last - (p + 1)) {
-            quick_sort(std::span<int>(first, p - first));
+            blockquick_sort(std::span<int>(first, p - first));
             first = p + 1; // Цикл while займется бОльшей правой частью
         } else {
-            quick_sort(std::span<int>(p + 1, last - (p + 1)));
+            blockquick_sort(std::span<int>(p + 1, last - (p + 1)));
             last = p;      // Цикл while займется бОльшей левой частью
         }
     }
