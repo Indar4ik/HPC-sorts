@@ -4,9 +4,13 @@
 *.dll
 *.so
 *.pdb
+*.optrpt
 *_clang
 *_gcc
 *_icpx
+*.g++*
+*.clang*
+*.icpx*
 compile_flags.txt
 
 sorts_bin/

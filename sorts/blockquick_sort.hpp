@@ -34,6 +34,7 @@ static int* block_partition(int* __restrict first, int* __restrict last) noexcep
         // Если левый карман пуст, сканируем следующие 64 элемента
         if (num_l == 0) {
             start_l = 0;
+            #pragma clang loop unroll(full)
             for (uint8_t i = 0; i < BLOCK_SIZE; ++i) {
                 offsets_l[num_l] = i;
                 num_l += (l[i] >= pivot); // BRANCHLESS! Предсказатель спит.
@@ -42,6 +43,7 @@ static int* block_partition(int* __restrict first, int* __restrict last) noexcep
         // Если правый карман пуст, сканируем следующие 64 элемента
         if (num_r == 0) {
             start_r = 0;
+            #pragma clang loop unroll(full)
             for (uint8_t i = 0; i < BLOCK_SIZE; ++i) {
                 offsets_r[num_r] = i;
                 num_r += (r[-1 - i] <= pivot); // BRANCHLESS!
