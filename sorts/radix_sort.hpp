@@ -5,7 +5,7 @@
 
 // Time complexity: T(n) = 6n
 // Space complexity: S(n) = 2n
-void radix_sort(std::span<int> arr) noexcept{
+inline void radix_sort(std::span<int> arr) noexcept{
     const size_t n = arr.size();
     if (n <= 1) return;
     
