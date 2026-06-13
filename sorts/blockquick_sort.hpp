@@ -4,8 +4,8 @@
 #include <cstdint>
 #include "sortnet/sorting_network.hpp"
 
-// Размер блока. 64 элемента = 256 байт (идеально для L1 и регистров)
-inline constexpr size_t BLOCK_SIZE = 64;
+// Размер блока. 128 элементов = 512 байт (идеально для L1 и регистров)
+inline constexpr size_t BLOCK_SIZE = 128;
 
 [[gnu::hot]]
 static int* block_partition(int* __restrict first, int* __restrict last) noexcept {
@@ -64,7 +64,7 @@ static int* block_partition(int* __restrict first, int* __restrict last) noexcep
     }
 
     // 4. ОСТАТОК (Tail Processing)
-    // У нас осталось меньше 128 элементов[l, r).
+    // У нас осталось меньше 256 элементов[l, r).
     // Мы прогоняем по ним Branchless Ломуто!
     int* left = l;
     for (int* curr = l; curr < r; ++curr) {
