@@ -5,13 +5,13 @@
 
 // Time complexity: T(n) = 6n
 // Space complexity: S(n) = 2n
-inline void radix_sort(std::span<int> arr) noexcept{
+inline void radix_sort(std::span<int32_t> arr) noexcept{
     const size_t n = arr.size();
     if (n <= 1) return;
     
-    std::vector<int> buffer(n);
-    int* const src = arr.data();
-    int* const dst = buffer.data();
+    std::vector<int32_t> buffer(n);
+    int32_t* const src = arr.data();
+    int32_t* const dst = buffer.data();
 
     size_t count[4][256] = {0};
     

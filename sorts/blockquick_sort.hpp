@@ -4,7 +4,7 @@
 #include <cstdint>
 #include "sortnet/sorting_network.hpp"
 
-// Размер блока. 128 элементов = 512 байт (идеально для L1 и регистров)
+// Размер блока. 128 элементов = 512 байт
 inline constexpr size_t BLOCK_SIZE = 128;
 
 [[gnu::hot]]
@@ -22,7 +22,7 @@ static int* block_partition(int* __restrict first, int* __restrict last) noexcep
     int* l = first + 1;
     int* r = last; // Полуинтервал
 
-    // "Карманы" для индексов нарушителей
+    // Карманы для индексов нарушителей
     uint8_t offsets_l[BLOCK_SIZE];
     uint8_t offsets_r[BLOCK_SIZE];
     
@@ -36,7 +36,7 @@ static int* block_partition(int* __restrict first, int* __restrict last) noexcep
             start_l = 0;
             for (uint8_t i = 0; i < BLOCK_SIZE; ++i) {
                 offsets_l[num_l] = i;
-                num_l += (l[i] >= pivot); // BRANCHLESS! Предсказатель спит.
+                num_l += (l[i] >= pivot);
             }
         }
         // Если правый карман пуст, сканируем следующие 64 элемента
@@ -44,7 +44,7 @@ static int* block_partition(int* __restrict first, int* __restrict last) noexcep
             start_r = 0;
             for (uint8_t i = 0; i < BLOCK_SIZE; ++i) {
                 offsets_r[num_r] = i;
-                num_r += (r[-1 - i] <= pivot); // BRANCHLESS!
+                num_r += (r[-1 - i] <= pivot);
             }
         }
 
@@ -65,17 +65,17 @@ static int* block_partition(int* __restrict first, int* __restrict last) noexcep
 
     // 4. ОСТАТОК (Tail Processing)
     // У нас осталось меньше 256 элементов[l, r).
-    // Мы прогоняем по ним Branchless Ломуто!
+    // Прогоняем по ним Branchless Ломуто
     int* left = l;
     for (int* curr = l; curr < r; ++curr) {
         int val = *curr;
         int tmp = *left;
         bool is_less = (val < pivot);
         
-        *curr = is_less ? tmp : val; // CMOV
-        *left = is_less ? val : tmp; // CMOV
+        *curr = is_less ? tmp : val;
+        *left = is_less ? val : tmp;
         
-        left += is_less; // BRANCHLESS
+        left += is_less;
     }
 
     // 5. Ставим пивот на его законное место

@@ -23,14 +23,9 @@ static void merge_core(int* __restrict src, int* __restrict dst, size_t left, si
     // Случай малого массива
     if (len <= 64){
         std::memcpy(out, in, len * sizeof(int));
+    //  merge_insertion_sort(out, len); return;
         network_sort(out, len); return;
     }
-
-    // if (len <= 64){
-    //     std::memcpy(out, in, len * sizeof(int));
-    //     merge_insertion_sort(out, len);
-    //     return;
-    // }
 
     // Ping-pong сортировка (в два раза меньше копирований)
     size_t mid = left + len / 2;
@@ -46,17 +41,17 @@ static void merge_core(int* __restrict src, int* __restrict dst, size_t left, si
     const int* l = src + left, *le = src + mid;
     const int* r = src + mid, *re = src + right;
 
-    // надо попробовать std::merge
     while (l < le && r < re) {
         bool pick = (*l <= *r);
         *out++ = std::min(*l, *r);
         l += pick;
         r += !pick;
     }
+
     // Докопирование оставшегося куска
     size_t rl = (size_t)(le - l), rr = (size_t)(re - r);
     std::memcpy(out, l, rl * sizeof(int));
-    std::memcpy(out + rl, r, rr * sizeof(int));
+    std::memcpy(out, r, rr * sizeof(int));
 }
 
 inline void merge_sort(std::span<int> arr) noexcept{

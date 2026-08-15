@@ -7,7 +7,7 @@
 // Average: O(n^2)
 // Worst: O(n^2)
 // Space complexity: Θ(1)
-void insertion_sort(std::span<int> arr) noexcept{
+inline void insertion_sort(std::span<int> arr) noexcept{
     const uint64_t n = arr.size();
     if (n <= 1) return;
     int* const data = arr.data();
