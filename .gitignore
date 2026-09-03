@@ -19,7 +19,9 @@ sorts/radix_10-11-11.hpp
 sorts/quick_branchless_lomuto.hpp
 sorts/superhardmerge_sort.hpp
 sorts/sortnet/*.html
+
 build/
+bench/
 out/
 /.*/
 CLAUDE.md

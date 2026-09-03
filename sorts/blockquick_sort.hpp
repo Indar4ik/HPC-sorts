@@ -1,17 +1,18 @@
 #pragma once
 #include <algorithm>
+#include <array>
 #include <span>
 #include <cstdint>
 #include "sortnet/sorting_network.hpp"
 
 // Размер блока. 128 элементов = 512 байт
-inline constexpr size_t BLOCK_SIZE = 128;
+constexpr uint8_t BLOCK_SIZE = 128;
 
 [[gnu::hot]]
 static int* block_partition(int* __restrict first, int* __restrict last) noexcept {
     size_t len = last - first;
     
-    // 1. Выбор Пивота (Медиана из трех) + легкая пре-сортировка
+    // 1. Выбор Пивота (Медиана из трех) + перестановка трёх элементов в правильном порядке
     int* mid = first + len / 2;
     if (*mid < *first) std::swap(*mid, *first);
     if (*(last - 1) < *first) std::swap(*(last - 1), *first);
@@ -23,11 +24,11 @@ static int* block_partition(int* __restrict first, int* __restrict last) noexcep
     int* r = last; // Полуинтервал
 
     // Карманы для индексов нарушителей
-    uint8_t offsets_l[BLOCK_SIZE];
-    uint8_t offsets_r[BLOCK_SIZE];
+    std::array<uint8_t, BLOCK_SIZE> offsets_l;
+    std::array<uint8_t, BLOCK_SIZE> offsets_r;
     
-    int num_l = 0, num_r = 0;     // Сколько нарушителей найдено
-    int start_l = 0, start_r = 0; // Откуда начинаем брать индексы для свапа
+    uint32_t num_l = 0, num_r = 0;     // Сколько нарушителей найдено
+    uint32_t start_l = 0, start_r = 0; // Откуда начинаем брать индексы для свапа
 
     // 2. Главный Блочный Цикл
     while (r - l >= 2 * BLOCK_SIZE) {
@@ -49,7 +50,7 @@ static int* block_partition(int* __restrict first, int* __restrict last) noexcep
         }
 
         // 3. Обмениваем элементы по сохраненным индексам
-        int swaps = std::min(num_l, num_r);
+        uint32_t swaps = std::min(num_l, num_r);
         for (int i = 0; i < swaps; ++i) {
             std::swap(l[offsets_l[start_l + i]], r[-1 - offsets_r[start_r + i]]);
         }
@@ -66,20 +67,19 @@ static int* block_partition(int* __restrict first, int* __restrict last) noexcep
     // 4. ОСТАТОК (Tail Processing)
     // У нас осталось меньше 256 элементов[l, r).
     // Прогоняем по ним Branchless Ломуто
-    int* left = l;
     for (int* curr = l; curr < r; ++curr) {
         int val = *curr;
-        int tmp = *left;
+        int tmp = *l;
         bool is_less = (val < pivot);
         
         *curr = is_less ? tmp : val;
-        *left = is_less ? val : tmp;
+        *l = is_less ? val : tmp;
         
-        left += is_less;
+        l += is_less;
     }
 
     // 5. Ставим пивот на его законное место
-    int* pivot_pos = left - 1;
+    int* pivot_pos = l - 1;
     std::swap(*first, *pivot_pos);
     return pivot_pos;
 }
