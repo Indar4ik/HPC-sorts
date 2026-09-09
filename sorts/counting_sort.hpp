@@ -3,7 +3,7 @@
 #include <algorithm>
 #include <vector>
 
-void counting_sort(std::span<int> arr){
+inline void counting_sort(std::span<int> arr){
     if (arr.size() <= 1) return;
     constexpr int MIN_VAL = -2048; 
     constexpr int MAX_VAL = 2047;

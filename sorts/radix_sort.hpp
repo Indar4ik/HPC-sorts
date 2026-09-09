@@ -38,10 +38,11 @@ inline void sort_impl(T* const __restrict src, const size_t n) noexcept {
         ++part[0][2][x >> 22];
     }
 
-    alignas(64) std::array<std::array<Counter, BUCKETS>, 3> count;
+    // Наборы сливаем на месте: нулевой становится итоговой гистограммой
+    auto& count = part[0];
     for (size_t p = 0; p < 3; ++p){
         for (size_t j = 0; j < BUCKETS; ++j){
-            count[p][j] = part[0][p][j] + part[1][p][j];
+            count[p][j] += part[1][p][j];
         }
     }
 
