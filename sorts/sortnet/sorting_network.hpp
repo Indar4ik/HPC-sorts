@@ -1,29 +1,43 @@
 #pragma once
-#include <algorithm>
+#include <cstddef>
 
-inline constexpr void cmp(int& a, int& b) noexcept{
-    int min_val = std::min(a, b);
-    int max_val = std::max(a, b);
-    a = min_val;
-    b = max_val;
+// Компаратор без ветвления: предсказатель переходов не участвует, ради чего
+// сети и нужны -- компилятор разворачивает это в пару cmov или min/max.
+//
+// Через std::min/std::max писать нельзя: при равных элементах min возвращает
+// первый аргумент И max возвращает его же, так что второй элемент затирается
+// копией первого. На числах это незаметно (равные числа неразличимы), а на
+// структуре с ключом и нагрузкой теряется половина данных. Здесь оба
+// элемента сохраняются явно. На int это ничего не стоит, на double даже
+// быстрее варианта с min/max.
+template <typename T>
+inline constexpr void cmp(T& a, T& b) noexcept{
+    const bool ordered = !(b < a);
+    const T lo = ordered ? a : b;
+    const T hi = ordered ? b : a;
+    a = lo;
+    b = hi;
 }
 
 // 3 inputs, 3 CEs
-inline constexpr void sort3(int* a) noexcept {
+template <typename T>
+inline constexpr void sort3(T* a) noexcept {
     cmp(a[0], a[2]);
     cmp(a[0], a[1]);
     cmp(a[1], a[2]);
 }
 
 // 4 inputs, 5 CEs
-inline constexpr void sort4(int* a) noexcept {
+template <typename T>
+inline constexpr void sort4(T* a) noexcept {
     cmp(a[0], a[2]); cmp(a[1], a[3]);
     cmp(a[0], a[1]); cmp(a[2], a[3]);
     cmp(a[1], a[2]);
 }
 
 // 5 inputs, 9 CEs
-inline constexpr void sort5(int* a) noexcept {
+template <typename T>
+inline constexpr void sort5(T* a) noexcept {
     cmp(a[0], a[3]); cmp(a[1], a[4]);
     cmp(a[0], a[2]); cmp(a[1], a[3]);
     cmp(a[0], a[1]); cmp(a[2], a[4]);
@@ -32,7 +46,8 @@ inline constexpr void sort5(int* a) noexcept {
 }
 
 // 6 inputs, 12 CEs
-inline constexpr void sort6(int* a) noexcept {
+template <typename T>
+inline constexpr void sort6(T* a) noexcept {
     cmp(a[0], a[5]); cmp(a[1], a[3]); cmp(a[2], a[4]);
     cmp(a[1], a[2]); cmp(a[3], a[4]);
     cmp(a[0], a[3]); cmp(a[2], a[5]);
@@ -41,7 +56,8 @@ inline constexpr void sort6(int* a) noexcept {
 }
 
 // 7 inputs, 16 CEs
-inline constexpr void sort7(int* a) noexcept {
+template <typename T>
+inline constexpr void sort7(T* a) noexcept {
     cmp(a[0], a[6]); cmp(a[2], a[3]); cmp(a[4], a[5]);
     cmp(a[0], a[2]); cmp(a[1], a[4]); cmp(a[3], a[6]);
     cmp(a[0], a[1]); cmp(a[2], a[5]); cmp(a[3], a[4]);
@@ -51,7 +67,8 @@ inline constexpr void sort7(int* a) noexcept {
 }
 
 // 8 inputs, 19 CEs
-inline constexpr void sort8(int* a) noexcept {
+template <typename T>
+inline constexpr void sort8(T* a) noexcept {
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[6]); cmp(a[5], a[7]);
     cmp(a[0], a[4]); cmp(a[1], a[5]); cmp(a[2], a[6]); cmp(a[3], a[7]);
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]);
@@ -61,7 +78,8 @@ inline constexpr void sort8(int* a) noexcept {
 }
 
 // 9 inputs, 25 CEs
-inline constexpr void sort9(int* a) noexcept {
+template <typename T>
+inline constexpr void sort9(T* a) noexcept {
     cmp(a[0], a[3]); cmp(a[1], a[7]); cmp(a[2], a[5]); cmp(a[4], a[8]);
     cmp(a[0], a[7]); cmp(a[2], a[4]); cmp(a[3], a[8]); cmp(a[5], a[6]);
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[5]); cmp(a[7], a[8]);
@@ -72,7 +90,8 @@ inline constexpr void sort9(int* a) noexcept {
 }
 
 // 10 inputs, 29 CEs
-inline constexpr void sort10(int* a) noexcept {
+template <typename T>
+inline constexpr void sort10(T* a) noexcept {
     cmp(a[0], a[8]); cmp(a[1], a[9]); cmp(a[2], a[7]); cmp(a[3], a[5]); cmp(a[4], a[6]);
     cmp(a[0], a[2]); cmp(a[1], a[4]); cmp(a[5], a[8]); cmp(a[7], a[9]);
     cmp(a[0], a[3]); cmp(a[2], a[4]); cmp(a[5], a[7]); cmp(a[6], a[9]);
@@ -84,7 +103,8 @@ inline constexpr void sort10(int* a) noexcept {
 }
 
 // 11 inputs, 35 CEs
-inline constexpr void sort11(int* a) noexcept {
+template <typename T>
+inline constexpr void sort11(T* a) noexcept {
     cmp(a[0], a[9]); cmp(a[1], a[6]); cmp(a[2], a[4]); cmp(a[3], a[7]); cmp(a[5], a[8]);
     cmp(a[0], a[1]); cmp(a[3], a[5]); cmp(a[4], a[10]); cmp(a[6], a[9]); cmp(a[7], a[8]);
     cmp(a[1], a[3]); cmp(a[2], a[5]); cmp(a[4], a[7]); cmp(a[8], a[10]);
@@ -96,7 +116,8 @@ inline constexpr void sort11(int* a) noexcept {
 }
 
 // 12 inputs, 39 CEs
-inline constexpr void sort12(int* a) noexcept {
+template <typename T>
+inline constexpr void sort12(T* a) noexcept {
     cmp(a[0], a[8]); cmp(a[1], a[7]); cmp(a[2], a[6]); cmp(a[3], a[11]); cmp(a[4], a[10]); cmp(a[5], a[9]);
     cmp(a[0], a[1]); cmp(a[2], a[5]); cmp(a[3], a[4]); cmp(a[6], a[9]); cmp(a[7], a[8]); cmp(a[10], a[11]);
     cmp(a[0], a[2]); cmp(a[1], a[6]); cmp(a[5], a[10]); cmp(a[9], a[11]);
@@ -109,7 +130,8 @@ inline constexpr void sort12(int* a) noexcept {
 }
 
 // 13 inputs, 45 CEs
-inline constexpr void sort13(int* a) noexcept {
+template <typename T>
+inline constexpr void sort13(T* a) noexcept {
     cmp(a[0], a[12]); cmp(a[1], a[10]); cmp(a[2], a[9]); cmp(a[3], a[7]); cmp(a[5], a[11]); cmp(a[6], a[8]);
     cmp(a[1], a[6]); cmp(a[2], a[3]); cmp(a[4], a[11]); cmp(a[7], a[9]); cmp(a[8], a[10]);
     cmp(a[0], a[4]); cmp(a[1], a[2]); cmp(a[3], a[6]); cmp(a[7], a[8]); cmp(a[9], a[10]); cmp(a[11], a[12]);
@@ -123,7 +145,8 @@ inline constexpr void sort13(int* a) noexcept {
 }
 
 // 14 inputs, 51 CEs
-inline constexpr void sort14(int* a) noexcept {
+template <typename T>
+inline constexpr void sort14(T* a) noexcept {
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]);
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[8]); cmp(a[5], a[9]); cmp(a[10], a[12]); cmp(a[11], a[13]);
     cmp(a[0], a[4]); cmp(a[1], a[2]); cmp(a[3], a[7]); cmp(a[5], a[8]); cmp(a[6], a[10]); cmp(a[9], a[13]); cmp(a[11], a[12]);
@@ -137,7 +160,8 @@ inline constexpr void sort14(int* a) noexcept {
 }
 
 // 15 inputs, 56 CEs
-inline constexpr void sort15(int* a) noexcept {
+template <typename T>
+inline constexpr void sort15(T* a) noexcept {
     cmp(a[1], a[2]); cmp(a[3], a[10]); cmp(a[4], a[14]); cmp(a[5], a[8]); cmp(a[6], a[13]); cmp(a[7], a[12]); cmp(a[9], a[11]);
     cmp(a[0], a[14]); cmp(a[1], a[5]); cmp(a[2], a[8]); cmp(a[3], a[7]); cmp(a[6], a[9]); cmp(a[10], a[12]); cmp(a[11], a[13]);
     cmp(a[0], a[7]); cmp(a[1], a[6]); cmp(a[2], a[9]); cmp(a[4], a[10]); cmp(a[5], a[11]); cmp(a[8], a[13]); cmp(a[12], a[14]);
@@ -151,7 +175,8 @@ inline constexpr void sort15(int* a) noexcept {
 }
 
 // 16 inputs, 60 CEs
-inline constexpr void sort16(int* a) noexcept {
+template <typename T>
+inline constexpr void sort16(T* a) noexcept {
     cmp(a[0], a[13]); cmp(a[1], a[12]); cmp(a[2], a[15]); cmp(a[3], a[14]); cmp(a[4], a[8]); cmp(a[5], a[6]); cmp(a[7], a[11]); cmp(a[9], a[10]);
     cmp(a[0], a[5]); cmp(a[1], a[7]); cmp(a[2], a[9]); cmp(a[3], a[4]); cmp(a[6], a[13]); cmp(a[8], a[14]); cmp(a[10], a[15]); cmp(a[11], a[12]);
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[8]); cmp(a[7], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]);
@@ -165,7 +190,8 @@ inline constexpr void sort16(int* a) noexcept {
 }
 
 // 17 inputs, 71 CEs
-inline constexpr void sort17(int* a) noexcept {
+template <typename T>
+inline constexpr void sort17(T* a) noexcept {
     cmp(a[0], a[11]); cmp(a[1], a[15]); cmp(a[2], a[10]); cmp(a[3], a[5]); cmp(a[4], a[6]); cmp(a[8], a[12]); cmp(a[9], a[16]); cmp(a[13], a[14]);
     cmp(a[0], a[6]); cmp(a[1], a[13]); cmp(a[2], a[8]); cmp(a[4], a[14]); cmp(a[5], a[15]); cmp(a[7], a[11]);
     cmp(a[0], a[8]); cmp(a[3], a[7]); cmp(a[4], a[9]); cmp(a[6], a[16]); cmp(a[10], a[11]); cmp(a[12], a[14]);
@@ -181,7 +207,8 @@ inline constexpr void sort17(int* a) noexcept {
 }
 
 // 18 inputs, 77 CEs
-inline constexpr void sort18(int* a) noexcept {
+template <typename T>
+inline constexpr void sort18(T* a) noexcept {
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[17]);
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[12]); cmp(a[5], a[13]); cmp(a[6], a[8]); cmp(a[9], a[11]); cmp(a[14], a[16]); cmp(a[15], a[17]);
     cmp(a[0], a[14]); cmp(a[1], a[16]); cmp(a[2], a[15]); cmp(a[3], a[17]);
@@ -197,7 +224,8 @@ inline constexpr void sort18(int* a) noexcept {
 }
 
 // 19 inputs, 85 CEs
-inline constexpr void sort19(int* a) noexcept {
+template <typename T>
+inline constexpr void sort19(T* a) noexcept {
     cmp(a[0], a[12]); cmp(a[1], a[4]); cmp(a[2], a[8]); cmp(a[3], a[5]); cmp(a[6], a[17]); cmp(a[7], a[11]); cmp(a[9], a[14]); cmp(a[10], a[13]); cmp(a[15], a[16]);
     cmp(a[0], a[2]); cmp(a[1], a[7]); cmp(a[3], a[6]); cmp(a[4], a[11]); cmp(a[5], a[17]); cmp(a[8], a[12]); cmp(a[10], a[15]); cmp(a[13], a[16]); cmp(a[14], a[18]);
     cmp(a[3], a[10]); cmp(a[4], a[14]); cmp(a[5], a[15]); cmp(a[6], a[13]); cmp(a[7], a[9]); cmp(a[11], a[17]); cmp(a[16], a[18]);
@@ -213,7 +241,8 @@ inline constexpr void sort19(int* a) noexcept {
 }
 
 // 20 inputs, 91 CEs
-inline constexpr void sort20(int* a) noexcept {
+template <typename T>
+inline constexpr void sort20(T* a) noexcept {
     cmp(a[0], a[3]); cmp(a[1], a[7]); cmp(a[2], a[5]); cmp(a[4], a[8]); cmp(a[6], a[9]); cmp(a[10], a[13]); cmp(a[11], a[15]); cmp(a[12], a[18]); cmp(a[14], a[17]); cmp(a[16], a[19]);
     cmp(a[0], a[14]); cmp(a[1], a[11]); cmp(a[2], a[16]); cmp(a[3], a[17]); cmp(a[4], a[12]); cmp(a[5], a[19]); cmp(a[6], a[10]); cmp(a[7], a[15]); cmp(a[8], a[18]); cmp(a[9], a[13]);
     cmp(a[0], a[4]); cmp(a[1], a[2]); cmp(a[3], a[8]); cmp(a[5], a[7]); cmp(a[11], a[16]); cmp(a[12], a[14]); cmp(a[15], a[19]); cmp(a[17], a[18]);
@@ -229,7 +258,8 @@ inline constexpr void sort20(int* a) noexcept {
 }
 
 // 21 inputs, 99 CEs
-inline constexpr void sort21(int* a) noexcept {
+template <typename T>
+inline constexpr void sort21(T* a) noexcept {
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[17]); cmp(a[18], a[19]);
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[6]); cmp(a[5], a[7]); cmp(a[8], a[10]); cmp(a[9], a[11]); cmp(a[12], a[14]); cmp(a[13], a[15]); cmp(a[16], a[18]); cmp(a[17], a[19]);
     cmp(a[0], a[8]); cmp(a[1], a[9]); cmp(a[2], a[10]); cmp(a[3], a[11]); cmp(a[4], a[12]); cmp(a[5], a[13]); cmp(a[6], a[14]); cmp(a[7], a[15]);
@@ -248,7 +278,8 @@ inline constexpr void sort21(int* a) noexcept {
 }
 
 // 22 inputs, 106 CEs
-inline constexpr void sort22(int* a) noexcept {
+template <typename T>
+inline constexpr void sort22(T* a) noexcept {
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[17]); cmp(a[18], a[19]); cmp(a[20], a[21]);
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[6]); cmp(a[5], a[7]); cmp(a[8], a[12]); cmp(a[9], a[13]); cmp(a[14], a[16]); cmp(a[15], a[17]); cmp(a[18], a[20]); cmp(a[19], a[21]);
     cmp(a[0], a[4]); cmp(a[1], a[5]); cmp(a[2], a[6]); cmp(a[3], a[7]); cmp(a[8], a[10]); cmp(a[9], a[12]); cmp(a[11], a[13]); cmp(a[14], a[18]); cmp(a[15], a[19]); cmp(a[16], a[20]); cmp(a[17], a[21]);
@@ -265,7 +296,8 @@ inline constexpr void sort22(int* a) noexcept {
 }
 
 // 23 inputs, 114 CEs
-inline constexpr void sort23(int* a) noexcept {
+template <typename T>
+inline constexpr void sort23(T* a) noexcept {
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[17]); cmp(a[18], a[19]); cmp(a[20], a[21]);
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[6]); cmp(a[5], a[7]); cmp(a[8], a[10]); cmp(a[9], a[11]); cmp(a[12], a[14]); cmp(a[13], a[15]); cmp(a[16], a[18]); cmp(a[17], a[19]); cmp(a[21], a[22]);
     cmp(a[0], a[4]); cmp(a[1], a[5]); cmp(a[2], a[6]); cmp(a[3], a[7]); cmp(a[8], a[12]); cmp(a[9], a[13]); cmp(a[10], a[14]); cmp(a[11], a[15]); cmp(a[17], a[21]); cmp(a[18], a[20]); cmp(a[19], a[22]);
@@ -283,7 +315,8 @@ inline constexpr void sort23(int* a) noexcept {
 }
 
 // 24 inputs, 120 CEs
-inline constexpr void sort24(int* a) noexcept {
+template <typename T>
+inline constexpr void sort24(T* a) noexcept {
     cmp(a[0], a[20]); cmp(a[1], a[12]); cmp(a[2], a[16]); cmp(a[3], a[23]); cmp(a[4], a[6]); cmp(a[5], a[10]); cmp(a[7], a[21]); cmp(a[8], a[14]); cmp(a[9], a[15]); cmp(a[11], a[22]); cmp(a[13], a[18]); cmp(a[17], a[19]);
     cmp(a[0], a[3]); cmp(a[1], a[11]); cmp(a[2], a[7]); cmp(a[4], a[17]); cmp(a[5], a[13]); cmp(a[6], a[19]); cmp(a[8], a[9]); cmp(a[10], a[18]); cmp(a[12], a[22]); cmp(a[14], a[15]); cmp(a[16], a[21]); cmp(a[20], a[23]);
     cmp(a[0], a[1]); cmp(a[2], a[4]); cmp(a[3], a[12]); cmp(a[5], a[8]); cmp(a[6], a[9]); cmp(a[7], a[10]); cmp(a[11], a[20]); cmp(a[13], a[16]); cmp(a[14], a[17]); cmp(a[15], a[18]); cmp(a[19], a[21]); cmp(a[22], a[23]);
@@ -300,7 +333,8 @@ inline constexpr void sort24(int* a) noexcept {
 }
 
 // 25 inputs, 130 CEs
-inline constexpr void sort25(int* a) noexcept {
+template <typename T>
+inline constexpr void sort25(T* a) noexcept {
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[17]); cmp(a[18], a[19]); cmp(a[20], a[21]); cmp(a[22], a[23]);
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[6]); cmp(a[5], a[7]); cmp(a[8], a[10]); cmp(a[9], a[11]); cmp(a[12], a[14]); cmp(a[13], a[15]); cmp(a[16], a[18]); cmp(a[17], a[19]); cmp(a[21], a[22]); cmp(a[23], a[24]);
     cmp(a[0], a[4]); cmp(a[1], a[5]); cmp(a[2], a[6]); cmp(a[3], a[7]); cmp(a[8], a[12]); cmp(a[9], a[13]); cmp(a[10], a[14]); cmp(a[11], a[15]); cmp(a[18], a[21]); cmp(a[20], a[23]); cmp(a[22], a[24]);
@@ -319,7 +353,8 @@ inline constexpr void sort25(int* a) noexcept {
 }
 
 // 26 inputs, 138 CEs
-inline constexpr void sort26(int* a) noexcept {
+template <typename T>
+inline constexpr void sort26(T* a) noexcept {
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[17]); cmp(a[18], a[19]); cmp(a[20], a[21]); cmp(a[22], a[23]); cmp(a[24], a[25]);
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[6]); cmp(a[5], a[7]); cmp(a[8], a[10]); cmp(a[9], a[11]); cmp(a[14], a[16]); cmp(a[15], a[17]); cmp(a[18], a[20]); cmp(a[19], a[21]); cmp(a[22], a[24]); cmp(a[23], a[25]);
     cmp(a[0], a[4]); cmp(a[1], a[6]); cmp(a[2], a[5]); cmp(a[3], a[7]); cmp(a[8], a[14]); cmp(a[9], a[16]); cmp(a[10], a[15]); cmp(a[11], a[17]); cmp(a[18], a[22]); cmp(a[19], a[24]); cmp(a[20], a[23]); cmp(a[21], a[25]);
@@ -338,7 +373,8 @@ inline constexpr void sort26(int* a) noexcept {
 }
 
 // 27 inputs, 147 CEs
-inline constexpr void sort27(int* a) noexcept {
+template <typename T>
+inline constexpr void sort27(T* a) noexcept {
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[14]); cmp(a[15], a[16]); cmp(a[17], a[18]); cmp(a[19], a[20]); cmp(a[21], a[22]); cmp(a[23], a[24]); cmp(a[25], a[26]);
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[6]); cmp(a[5], a[7]); cmp(a[8], a[10]); cmp(a[9], a[11]); cmp(a[12], a[13]); cmp(a[15], a[17]); cmp(a[16], a[18]); cmp(a[19], a[21]); cmp(a[20], a[22]); cmp(a[23], a[25]); cmp(a[24], a[26]);
     cmp(a[0], a[23]); cmp(a[1], a[24]); cmp(a[2], a[25]); cmp(a[3], a[26]); cmp(a[4], a[8]); cmp(a[5], a[9]); cmp(a[6], a[10]); cmp(a[7], a[11]); cmp(a[13], a[14]); cmp(a[15], a[19]); cmp(a[16], a[20]); cmp(a[17], a[21]); cmp(a[18], a[22]);
@@ -358,7 +394,8 @@ inline constexpr void sort27(int* a) noexcept {
 }
 
 // 28 inputs, 155 CEs
-inline constexpr void sort28(int* a) noexcept {
+template <typename T>
+inline constexpr void sort28(T* a) noexcept {
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[17]); cmp(a[18], a[19]); cmp(a[20], a[21]); cmp(a[22], a[23]); cmp(a[24], a[25]); cmp(a[26], a[27]);
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[6]); cmp(a[5], a[7]); cmp(a[8], a[10]); cmp(a[9], a[11]); cmp(a[12], a[14]); cmp(a[13], a[15]); cmp(a[16], a[18]); cmp(a[17], a[19]); cmp(a[20], a[22]); cmp(a[21], a[23]); cmp(a[24], a[26]); cmp(a[25], a[27]);
     cmp(a[0], a[4]); cmp(a[1], a[5]); cmp(a[2], a[6]); cmp(a[3], a[7]); cmp(a[8], a[12]); cmp(a[9], a[13]); cmp(a[14], a[18]); cmp(a[15], a[19]); cmp(a[20], a[24]); cmp(a[21], a[25]); cmp(a[22], a[26]); cmp(a[23], a[27]);
@@ -376,7 +413,8 @@ inline constexpr void sort28(int* a) noexcept {
 }
 
 // 29 inputs, 164 CEs
-inline constexpr void sort29(int* a) noexcept {
+template <typename T>
+inline constexpr void sort29(T* a) noexcept {
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[28]); cmp(a[17], a[26]); cmp(a[18], a[25]); cmp(a[19], a[23]); cmp(a[21], a[27]); cmp(a[22], a[24]);
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[6]); cmp(a[5], a[7]); cmp(a[8], a[10]); cmp(a[9], a[11]); cmp(a[12], a[14]); cmp(a[13], a[15]); cmp(a[17], a[22]); cmp(a[18], a[19]); cmp(a[20], a[27]); cmp(a[23], a[25]); cmp(a[24], a[26]);
     cmp(a[0], a[4]); cmp(a[1], a[5]); cmp(a[2], a[6]); cmp(a[3], a[7]); cmp(a[8], a[12]); cmp(a[9], a[13]); cmp(a[10], a[14]); cmp(a[11], a[15]); cmp(a[16], a[20]); cmp(a[17], a[18]); cmp(a[19], a[22]); cmp(a[23], a[24]); cmp(a[25], a[26]); cmp(a[27], a[28]);
@@ -395,7 +433,8 @@ inline constexpr void sort29(int* a) noexcept {
 }
 
 // 30 inputs, 172 CEs
-inline constexpr void sort30(int* a) noexcept {
+template <typename T>
+inline constexpr void sort30(T* a) noexcept {
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[17]); cmp(a[18], a[19]); cmp(a[20], a[21]); cmp(a[22], a[23]); cmp(a[24], a[25]); cmp(a[26], a[27]); cmp(a[28], a[29]);
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[6]); cmp(a[5], a[7]); cmp(a[8], a[10]); cmp(a[9], a[11]); cmp(a[13], a[15]); cmp(a[14], a[16]); cmp(a[18], a[20]); cmp(a[19], a[21]); cmp(a[22], a[24]); cmp(a[23], a[25]); cmp(a[26], a[28]); cmp(a[27], a[29]);
     cmp(a[0], a[4]); cmp(a[1], a[5]); cmp(a[2], a[6]); cmp(a[3], a[7]); cmp(a[8], a[14]); cmp(a[9], a[17]); cmp(a[10], a[16]); cmp(a[12], a[20]); cmp(a[13], a[19]); cmp(a[15], a[21]); cmp(a[22], a[26]); cmp(a[23], a[27]); cmp(a[24], a[28]); cmp(a[25], a[29]);
@@ -413,7 +452,8 @@ inline constexpr void sort30(int* a) noexcept {
 }
 
 // 31 inputs, 180 CEs
-inline constexpr void sort31(int* a) noexcept {
+template <typename T>
+inline constexpr void sort31(T* a) noexcept {
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[17]); cmp(a[18], a[19]); cmp(a[20], a[21]); cmp(a[22], a[23]); cmp(a[24], a[25]); cmp(a[26], a[27]); cmp(a[28], a[29]);
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[6]); cmp(a[5], a[7]); cmp(a[8], a[10]); cmp(a[9], a[11]); cmp(a[12], a[14]); cmp(a[13], a[15]); cmp(a[16], a[18]); cmp(a[17], a[19]); cmp(a[20], a[22]); cmp(a[21], a[23]); cmp(a[24], a[26]); cmp(a[25], a[27]); cmp(a[28], a[30]);
     cmp(a[0], a[4]); cmp(a[1], a[5]); cmp(a[2], a[6]); cmp(a[3], a[7]); cmp(a[8], a[12]); cmp(a[9], a[13]); cmp(a[10], a[14]); cmp(a[11], a[15]); cmp(a[16], a[20]); cmp(a[17], a[21]); cmp(a[18], a[22]); cmp(a[19], a[23]); cmp(a[24], a[28]); cmp(a[25], a[29]); cmp(a[26], a[30]);
@@ -431,7 +471,8 @@ inline constexpr void sort31(int* a) noexcept {
 }
 
 // 32 inputs, 185 CEs
-inline constexpr void sort32(int* a) noexcept {
+template <typename T>
+inline constexpr void sort32(T* a) noexcept {
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[17]); cmp(a[18], a[19]); cmp(a[20], a[21]); cmp(a[22], a[23]); cmp(a[24], a[25]); cmp(a[26], a[27]); cmp(a[28], a[29]); cmp(a[30], a[31]);
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[6]); cmp(a[5], a[7]); cmp(a[8], a[10]); cmp(a[9], a[11]); cmp(a[12], a[14]); cmp(a[13], a[15]); cmp(a[16], a[18]); cmp(a[17], a[19]); cmp(a[20], a[22]); cmp(a[21], a[23]); cmp(a[24], a[26]); cmp(a[25], a[27]); cmp(a[28], a[30]); cmp(a[29], a[31]);
     cmp(a[0], a[4]); cmp(a[1], a[5]); cmp(a[2], a[6]); cmp(a[3], a[7]); cmp(a[8], a[12]); cmp(a[9], a[13]); cmp(a[10], a[14]); cmp(a[11], a[15]); cmp(a[16], a[20]); cmp(a[17], a[21]); cmp(a[18], a[22]); cmp(a[19], a[23]); cmp(a[24], a[28]); cmp(a[25], a[29]); cmp(a[26], a[30]); cmp(a[27], a[31]);
@@ -449,7 +490,8 @@ inline constexpr void sort32(int* a) noexcept {
 }
 
 // 33 inputs, 199 CEs
-inline constexpr void sort33(int* a) noexcept {
+template <typename T>
+inline constexpr void sort33(T* a) noexcept {
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[17]); cmp(a[18], a[19]); cmp(a[20], a[21]); cmp(a[22], a[23]); cmp(a[24], a[25]); cmp(a[26], a[27]); cmp(a[28], a[29]); cmp(a[30], a[31]);
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[6]); cmp(a[5], a[7]); cmp(a[8], a[10]); cmp(a[9], a[11]); cmp(a[12], a[14]); cmp(a[13], a[15]); cmp(a[16], a[18]); cmp(a[17], a[19]); cmp(a[20], a[22]); cmp(a[21], a[23]); cmp(a[24], a[26]); cmp(a[25], a[27]); cmp(a[28], a[30]); cmp(a[29], a[31]);
     cmp(a[0], a[4]); cmp(a[1], a[5]); cmp(a[2], a[6]); cmp(a[3], a[7]); cmp(a[8], a[12]); cmp(a[9], a[13]); cmp(a[10], a[14]); cmp(a[11], a[15]); cmp(a[16], a[20]); cmp(a[17], a[21]); cmp(a[18], a[22]); cmp(a[19], a[23]); cmp(a[24], a[28]); cmp(a[25], a[29]); cmp(a[26], a[30]); cmp(a[27], a[31]);
@@ -468,7 +510,8 @@ inline constexpr void sort33(int* a) noexcept {
 }
 
 // 34 inputs, 209 CEs
-inline constexpr void sort34(int* a) noexcept {
+template <typename T>
+inline constexpr void sort34(T* a) noexcept {
     cmp(a[0], a[33]); cmp(a[1], a[2]); cmp(a[3], a[4]); cmp(a[5], a[6]); cmp(a[7], a[8]); cmp(a[9], a[10]); cmp(a[11], a[12]); cmp(a[13], a[14]); cmp(a[15], a[16]); cmp(a[17], a[18]); cmp(a[19], a[20]); cmp(a[21], a[22]); cmp(a[23], a[24]); cmp(a[25], a[26]); cmp(a[27], a[28]); cmp(a[29], a[30]); cmp(a[31], a[32]);
     cmp(a[1], a[3]); cmp(a[2], a[4]); cmp(a[5], a[7]); cmp(a[6], a[8]); cmp(a[9], a[11]); cmp(a[10], a[12]); cmp(a[13], a[15]); cmp(a[14], a[16]); cmp(a[17], a[19]); cmp(a[18], a[20]); cmp(a[21], a[23]); cmp(a[22], a[24]); cmp(a[25], a[27]); cmp(a[26], a[28]); cmp(a[29], a[31]); cmp(a[30], a[32]);
     cmp(a[1], a[5]); cmp(a[2], a[6]); cmp(a[3], a[7]); cmp(a[4], a[8]); cmp(a[9], a[13]); cmp(a[10], a[14]); cmp(a[11], a[15]); cmp(a[12], a[16]); cmp(a[17], a[21]); cmp(a[18], a[22]); cmp(a[19], a[23]); cmp(a[20], a[24]); cmp(a[25], a[29]); cmp(a[26], a[30]); cmp(a[27], a[31]); cmp(a[28], a[32]);
@@ -489,7 +532,8 @@ inline constexpr void sort34(int* a) noexcept {
 }
 
 // 35 inputs, 220 CEs
-inline constexpr void sort35(int* a) noexcept {
+template <typename T>
+inline constexpr void sort35(T* a) noexcept {
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[17]); cmp(a[18], a[19]); cmp(a[20], a[21]); cmp(a[22], a[23]); cmp(a[24], a[25]); cmp(a[26], a[27]); cmp(a[28], a[29]); cmp(a[30], a[31]); cmp(a[32], a[33]);
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[6]); cmp(a[5], a[7]); cmp(a[8], a[10]); cmp(a[9], a[11]); cmp(a[12], a[14]); cmp(a[13], a[15]); cmp(a[16], a[18]); cmp(a[17], a[19]); cmp(a[20], a[22]); cmp(a[21], a[23]); cmp(a[24], a[26]); cmp(a[25], a[27]); cmp(a[28], a[30]); cmp(a[29], a[31]); cmp(a[33], a[34]);
     cmp(a[0], a[4]); cmp(a[1], a[5]); cmp(a[2], a[6]); cmp(a[3], a[7]); cmp(a[8], a[12]); cmp(a[9], a[13]); cmp(a[10], a[14]); cmp(a[11], a[15]); cmp(a[16], a[20]); cmp(a[17], a[21]); cmp(a[18], a[22]); cmp(a[19], a[23]); cmp(a[24], a[28]); cmp(a[25], a[29]); cmp(a[26], a[30]); cmp(a[27], a[31]); cmp(a[32], a[33]);
@@ -510,7 +554,8 @@ inline constexpr void sort35(int* a) noexcept {
 }
 
 // 36 inputs, 227 CEs
-inline constexpr void sort36(int* a) noexcept {
+template <typename T>
+inline constexpr void sort36(T* a) noexcept {
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[17]); cmp(a[18], a[19]); cmp(a[20], a[21]); cmp(a[22], a[23]); cmp(a[24], a[25]); cmp(a[26], a[27]); cmp(a[28], a[29]); cmp(a[30], a[31]); cmp(a[32], a[33]); cmp(a[34], a[35]);
     cmp(a[0], a[34]); cmp(a[1], a[35]); cmp(a[2], a[4]); cmp(a[3], a[5]); cmp(a[6], a[8]); cmp(a[7], a[9]); cmp(a[10], a[12]); cmp(a[11], a[13]); cmp(a[14], a[16]); cmp(a[15], a[17]); cmp(a[18], a[20]); cmp(a[19], a[21]); cmp(a[22], a[24]); cmp(a[23], a[25]); cmp(a[26], a[28]); cmp(a[27], a[29]); cmp(a[30], a[32]); cmp(a[31], a[33]);
     cmp(a[2], a[6]); cmp(a[3], a[7]); cmp(a[4], a[8]); cmp(a[5], a[9]); cmp(a[10], a[14]); cmp(a[11], a[15]); cmp(a[12], a[16]); cmp(a[13], a[17]); cmp(a[18], a[22]); cmp(a[19], a[23]); cmp(a[20], a[24]); cmp(a[21], a[25]); cmp(a[26], a[30]); cmp(a[27], a[31]); cmp(a[28], a[32]); cmp(a[29], a[33]);
@@ -532,7 +577,8 @@ inline constexpr void sort36(int* a) noexcept {
 }
 
 // 37 inputs, 240 CEs
-inline constexpr void sort37(int* a) noexcept {
+template <typename T>
+inline constexpr void sort37(T* a) noexcept {
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[17]); cmp(a[18], a[19]); cmp(a[20], a[21]); cmp(a[22], a[23]); cmp(a[24], a[25]); cmp(a[26], a[27]); cmp(a[28], a[29]); cmp(a[30], a[31]); cmp(a[32], a[35]); cmp(a[33], a[36]);
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[6]); cmp(a[5], a[7]); cmp(a[8], a[10]); cmp(a[9], a[11]); cmp(a[12], a[14]); cmp(a[13], a[15]); cmp(a[16], a[18]); cmp(a[17], a[19]); cmp(a[20], a[22]); cmp(a[21], a[23]); cmp(a[24], a[26]); cmp(a[25], a[27]); cmp(a[28], a[30]); cmp(a[29], a[31]); cmp(a[32], a[34]); cmp(a[33], a[35]);
     cmp(a[0], a[4]); cmp(a[1], a[5]); cmp(a[2], a[6]); cmp(a[3], a[7]); cmp(a[8], a[12]); cmp(a[9], a[13]); cmp(a[10], a[14]); cmp(a[11], a[15]); cmp(a[16], a[20]); cmp(a[17], a[21]); cmp(a[18], a[22]); cmp(a[19], a[23]); cmp(a[24], a[28]); cmp(a[25], a[29]); cmp(a[26], a[30]); cmp(a[27], a[31]); cmp(a[32], a[33]); cmp(a[34], a[36]);
@@ -553,7 +599,8 @@ inline constexpr void sort37(int* a) noexcept {
 }
 
 // 38 inputs, 250 CEs
-inline constexpr void sort38(int* a) noexcept {
+template <typename T>
+inline constexpr void sort38(T* a) noexcept {
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[17]); cmp(a[18], a[19]); cmp(a[20], a[21]); cmp(a[22], a[23]); cmp(a[24], a[25]); cmp(a[26], a[27]); cmp(a[28], a[29]); cmp(a[30], a[31]); cmp(a[32], a[33]); cmp(a[34], a[35]); cmp(a[36], a[37]);
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[6]); cmp(a[5], a[7]); cmp(a[8], a[10]); cmp(a[9], a[11]); cmp(a[12], a[14]); cmp(a[13], a[15]); cmp(a[16], a[20]); cmp(a[17], a[21]); cmp(a[22], a[24]); cmp(a[23], a[25]); cmp(a[26], a[28]); cmp(a[27], a[29]); cmp(a[30], a[32]); cmp(a[31], a[33]); cmp(a[34], a[36]); cmp(a[35], a[37]);
     cmp(a[0], a[4]); cmp(a[1], a[5]); cmp(a[2], a[6]); cmp(a[3], a[7]); cmp(a[8], a[12]); cmp(a[9], a[13]); cmp(a[10], a[14]); cmp(a[11], a[15]); cmp(a[16], a[18]); cmp(a[19], a[21]); cmp(a[22], a[26]); cmp(a[23], a[27]); cmp(a[24], a[28]); cmp(a[25], a[29]); cmp(a[30], a[34]); cmp(a[31], a[35]); cmp(a[32], a[36]); cmp(a[33], a[37]);
@@ -574,7 +621,8 @@ inline constexpr void sort38(int* a) noexcept {
 }
 
 // 39 inputs, 259 CEs
-inline constexpr void sort39(int* a) noexcept {
+template <typename T>
+inline constexpr void sort39(T* a) noexcept {
     cmp(a[1], a[2]); cmp(a[3], a[6]); cmp(a[4], a[5]); cmp(a[7], a[14]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[15], a[38]); cmp(a[16], a[17]); cmp(a[18], a[19]); cmp(a[20], a[21]); cmp(a[22], a[23]); cmp(a[24], a[25]); cmp(a[26], a[27]); cmp(a[28], a[29]); cmp(a[30], a[31]); cmp(a[32], a[33]); cmp(a[34], a[35]); cmp(a[36], a[37]);
     cmp(a[0], a[1]); cmp(a[3], a[4]); cmp(a[5], a[6]); cmp(a[7], a[12]); cmp(a[8], a[10]); cmp(a[9], a[11]); cmp(a[13], a[14]); cmp(a[15], a[36]); cmp(a[16], a[18]); cmp(a[17], a[19]); cmp(a[20], a[22]); cmp(a[21], a[23]); cmp(a[24], a[26]); cmp(a[25], a[27]); cmp(a[28], a[30]); cmp(a[29], a[31]); cmp(a[32], a[34]); cmp(a[33], a[35]); cmp(a[37], a[38]);
     cmp(a[0], a[3]); cmp(a[1], a[4]); cmp(a[2], a[5]); cmp(a[7], a[8]); cmp(a[9], a[13]); cmp(a[10], a[12]); cmp(a[11], a[14]); cmp(a[15], a[32]); cmp(a[16], a[20]); cmp(a[17], a[21]); cmp(a[18], a[22]); cmp(a[19], a[23]); cmp(a[24], a[28]); cmp(a[25], a[29]); cmp(a[26], a[30]); cmp(a[27], a[31]); cmp(a[33], a[37]); cmp(a[34], a[36]); cmp(a[35], a[38]);
@@ -595,7 +643,8 @@ inline constexpr void sort39(int* a) noexcept {
 }
 
 // 40 inputs, 265 CEs
-inline constexpr void sort40(int* a) noexcept {
+template <typename T>
+inline constexpr void sort40(T* a) noexcept {
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[17]); cmp(a[18], a[19]); cmp(a[20], a[21]); cmp(a[22], a[23]); cmp(a[24], a[25]); cmp(a[26], a[27]); cmp(a[28], a[29]); cmp(a[30], a[31]); cmp(a[32], a[33]); cmp(a[34], a[35]); cmp(a[36], a[37]); cmp(a[38], a[39]);
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[6]); cmp(a[5], a[7]); cmp(a[8], a[10]); cmp(a[9], a[11]); cmp(a[12], a[14]); cmp(a[13], a[15]); cmp(a[16], a[18]); cmp(a[17], a[19]); cmp(a[20], a[22]); cmp(a[21], a[23]); cmp(a[24], a[26]); cmp(a[25], a[27]); cmp(a[28], a[30]); cmp(a[29], a[31]); cmp(a[32], a[34]); cmp(a[33], a[35]); cmp(a[36], a[38]); cmp(a[37], a[39]);
     cmp(a[0], a[4]); cmp(a[1], a[5]); cmp(a[2], a[6]); cmp(a[3], a[7]); cmp(a[8], a[12]); cmp(a[9], a[13]); cmp(a[10], a[14]); cmp(a[11], a[15]); cmp(a[16], a[20]); cmp(a[17], a[21]); cmp(a[18], a[22]); cmp(a[19], a[23]); cmp(a[24], a[28]); cmp(a[25], a[29]); cmp(a[26], a[30]); cmp(a[27], a[31]); cmp(a[32], a[36]); cmp(a[33], a[37]); cmp(a[34], a[38]); cmp(a[35], a[39]);
@@ -616,7 +665,8 @@ inline constexpr void sort40(int* a) noexcept {
 }
 
 // 41 inputs, 282 CEs
-inline constexpr void sort41(int* a) noexcept {
+template <typename T>
+inline constexpr void sort41(T* a) noexcept {
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[17]); cmp(a[18], a[19]); cmp(a[20], a[21]); cmp(a[22], a[23]); cmp(a[24], a[25]); cmp(a[26], a[27]); cmp(a[28], a[29]); cmp(a[30], a[31]); cmp(a[32], a[33]); cmp(a[34], a[35]); cmp(a[36], a[37]); cmp(a[38], a[39]);
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[6]); cmp(a[5], a[7]); cmp(a[8], a[10]); cmp(a[9], a[11]); cmp(a[12], a[14]); cmp(a[13], a[15]); cmp(a[16], a[18]); cmp(a[17], a[19]); cmp(a[20], a[22]); cmp(a[21], a[23]); cmp(a[24], a[26]); cmp(a[25], a[27]); cmp(a[28], a[30]); cmp(a[29], a[31]); cmp(a[32], a[34]); cmp(a[33], a[35]); cmp(a[36], a[38]); cmp(a[37], a[39]);
     cmp(a[0], a[4]); cmp(a[1], a[5]); cmp(a[2], a[6]); cmp(a[3], a[7]); cmp(a[8], a[12]); cmp(a[9], a[13]); cmp(a[10], a[14]); cmp(a[11], a[15]); cmp(a[16], a[20]); cmp(a[17], a[21]); cmp(a[18], a[22]); cmp(a[19], a[23]); cmp(a[24], a[28]); cmp(a[25], a[29]); cmp(a[26], a[30]); cmp(a[27], a[31]); cmp(a[32], a[36]); cmp(a[33], a[37]); cmp(a[34], a[38]); cmp(a[35], a[39]);
@@ -638,7 +688,8 @@ inline constexpr void sort41(int* a) noexcept {
 }
 
 // 42 inputs, 291 CEs
-inline constexpr void sort42(int* a) noexcept {
+template <typename T>
+inline constexpr void sort42(T* a) noexcept {
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[17]); cmp(a[18], a[19]); cmp(a[20], a[21]); cmp(a[22], a[23]); cmp(a[24], a[25]); cmp(a[26], a[27]); cmp(a[28], a[29]); cmp(a[30], a[31]); cmp(a[32], a[33]); cmp(a[34], a[35]); cmp(a[36], a[37]); cmp(a[38], a[39]); cmp(a[40], a[41]);
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[6]); cmp(a[5], a[7]); cmp(a[8], a[10]); cmp(a[9], a[11]); cmp(a[12], a[14]); cmp(a[13], a[15]); cmp(a[16], a[24]); cmp(a[17], a[25]); cmp(a[18], a[22]); cmp(a[19], a[23]); cmp(a[26], a[28]); cmp(a[27], a[29]); cmp(a[30], a[32]); cmp(a[31], a[33]); cmp(a[34], a[36]); cmp(a[35], a[37]); cmp(a[38], a[40]); cmp(a[39], a[41]);
     cmp(a[0], a[4]); cmp(a[1], a[5]); cmp(a[2], a[6]); cmp(a[3], a[7]); cmp(a[8], a[12]); cmp(a[9], a[13]); cmp(a[10], a[14]); cmp(a[11], a[15]); cmp(a[16], a[18]); cmp(a[17], a[20]); cmp(a[19], a[22]); cmp(a[21], a[24]); cmp(a[23], a[25]); cmp(a[26], a[30]); cmp(a[27], a[31]); cmp(a[28], a[32]); cmp(a[29], a[33]); cmp(a[34], a[38]); cmp(a[35], a[39]); cmp(a[36], a[40]); cmp(a[37], a[41]);
@@ -660,7 +711,8 @@ inline constexpr void sort42(int* a) noexcept {
 }
 
 // 43 inputs, 303 CEs
-inline constexpr void sort43(int* a) noexcept {
+template <typename T>
+inline constexpr void sort43(T* a) noexcept {
     cmp(a[1], a[2]); cmp(a[3], a[6]); cmp(a[4], a[5]); cmp(a[7], a[14]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[15], a[42]); cmp(a[16], a[17]); cmp(a[18], a[19]); cmp(a[20], a[21]); cmp(a[22], a[23]); cmp(a[24], a[25]); cmp(a[26], a[27]); cmp(a[28], a[29]); cmp(a[30], a[31]); cmp(a[32], a[33]); cmp(a[34], a[35]); cmp(a[36], a[37]); cmp(a[38], a[39]); cmp(a[40], a[41]);
     cmp(a[0], a[1]); cmp(a[3], a[4]); cmp(a[5], a[6]); cmp(a[7], a[12]); cmp(a[8], a[10]); cmp(a[9], a[11]); cmp(a[13], a[14]); cmp(a[15], a[40]); cmp(a[16], a[18]); cmp(a[17], a[19]); cmp(a[20], a[22]); cmp(a[21], a[23]); cmp(a[24], a[26]); cmp(a[25], a[27]); cmp(a[28], a[30]); cmp(a[29], a[31]); cmp(a[32], a[34]); cmp(a[33], a[35]); cmp(a[36], a[38]); cmp(a[37], a[39]); cmp(a[41], a[42]);
     cmp(a[0], a[3]); cmp(a[1], a[4]); cmp(a[2], a[5]); cmp(a[7], a[8]); cmp(a[9], a[13]); cmp(a[10], a[12]); cmp(a[11], a[14]); cmp(a[15], a[36]); cmp(a[16], a[24]); cmp(a[17], a[25]); cmp(a[18], a[26]); cmp(a[19], a[27]); cmp(a[28], a[32]); cmp(a[29], a[33]); cmp(a[30], a[34]); cmp(a[31], a[35]); cmp(a[37], a[41]); cmp(a[38], a[40]); cmp(a[39], a[42]);
@@ -683,7 +735,8 @@ inline constexpr void sort43(int* a) noexcept {
 }
 
 // 44 inputs, 309 CEs
-inline constexpr void sort44(int* a) noexcept {
+template <typename T>
+inline constexpr void sort44(T* a) noexcept {
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[17]); cmp(a[18], a[19]); cmp(a[20], a[21]); cmp(a[22], a[23]); cmp(a[24], a[25]); cmp(a[26], a[27]); cmp(a[28], a[29]); cmp(a[30], a[31]); cmp(a[32], a[33]); cmp(a[34], a[35]); cmp(a[36], a[37]); cmp(a[38], a[39]); cmp(a[40], a[41]); cmp(a[42], a[43]);
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[6]); cmp(a[5], a[7]); cmp(a[8], a[10]); cmp(a[9], a[11]); cmp(a[12], a[14]); cmp(a[13], a[15]); cmp(a[16], a[18]); cmp(a[17], a[19]); cmp(a[20], a[22]); cmp(a[21], a[23]); cmp(a[24], a[26]); cmp(a[25], a[27]); cmp(a[28], a[30]); cmp(a[29], a[31]); cmp(a[32], a[34]); cmp(a[33], a[35]); cmp(a[36], a[38]); cmp(a[37], a[39]); cmp(a[40], a[42]); cmp(a[41], a[43]);
     cmp(a[0], a[4]); cmp(a[1], a[5]); cmp(a[2], a[6]); cmp(a[3], a[7]); cmp(a[8], a[12]); cmp(a[9], a[13]); cmp(a[10], a[14]); cmp(a[11], a[15]); cmp(a[16], a[24]); cmp(a[17], a[25]); cmp(a[18], a[26]); cmp(a[19], a[27]); cmp(a[28], a[32]); cmp(a[29], a[33]); cmp(a[30], a[34]); cmp(a[31], a[35]); cmp(a[36], a[40]); cmp(a[37], a[41]); cmp(a[38], a[42]); cmp(a[39], a[43]);
@@ -706,7 +759,8 @@ inline constexpr void sort44(int* a) noexcept {
 }
 
 // 45 inputs, 324 CEs
-inline constexpr void sort45(int* a) noexcept {
+template <typename T>
+inline constexpr void sort45(T* a) noexcept {
     cmp(a[3], a[12]); cmp(a[4], a[8]); cmp(a[5], a[6]); cmp(a[7], a[11]); cmp(a[9], a[10]); cmp(a[13], a[32]); cmp(a[14], a[35]); cmp(a[15], a[18]); cmp(a[16], a[29]); cmp(a[17], a[28]); cmp(a[19], a[30]); cmp(a[20], a[24]); cmp(a[21], a[22]); cmp(a[23], a[27]); cmp(a[25], a[26]); cmp(a[31], a[34]); cmp(a[33], a[44]); cmp(a[36], a[40]); cmp(a[37], a[38]); cmp(a[39], a[43]); cmp(a[41], a[42]);
     cmp(a[0], a[5]); cmp(a[1], a[7]); cmp(a[2], a[9]); cmp(a[3], a[4]); cmp(a[8], a[12]); cmp(a[10], a[11]); cmp(a[13], a[37]); cmp(a[14], a[36]); cmp(a[15], a[25]); cmp(a[16], a[21]); cmp(a[17], a[23]); cmp(a[18], a[26]); cmp(a[19], a[20]); cmp(a[22], a[29]); cmp(a[24], a[30]); cmp(a[27], a[28]); cmp(a[31], a[41]); cmp(a[32], a[38]); cmp(a[33], a[39]); cmp(a[34], a[42]); cmp(a[35], a[40]); cmp(a[43], a[44]);
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[8]); cmp(a[7], a[9]); cmp(a[13], a[33]); cmp(a[14], a[31]); cmp(a[15], a[19]); cmp(a[16], a[17]); cmp(a[18], a[27]); cmp(a[20], a[21]); cmp(a[22], a[24]); cmp(a[23], a[25]); cmp(a[26], a[30]); cmp(a[28], a[29]); cmp(a[32], a[35]); cmp(a[34], a[43]); cmp(a[36], a[37]); cmp(a[38], a[44]); cmp(a[39], a[41]); cmp(a[40], a[42]);
@@ -729,7 +783,8 @@ inline constexpr void sort45(int* a) noexcept {
 }
 
 // 46 inputs, 332 CEs
-inline constexpr void sort46(int* a) noexcept {
+template <typename T>
+inline constexpr void sort46(T* a) noexcept {
     cmp(a[2], a[13]); cmp(a[3], a[12]); cmp(a[4], a[8]); cmp(a[5], a[6]); cmp(a[7], a[11]); cmp(a[9], a[10]); cmp(a[14], a[35]); cmp(a[15], a[18]); cmp(a[16], a[29]); cmp(a[17], a[28]); cmp(a[19], a[30]); cmp(a[20], a[24]); cmp(a[21], a[22]); cmp(a[23], a[27]); cmp(a[25], a[26]); cmp(a[31], a[34]); cmp(a[32], a[45]); cmp(a[33], a[44]); cmp(a[36], a[40]); cmp(a[37], a[38]); cmp(a[39], a[43]); cmp(a[41], a[42]);
     cmp(a[0], a[5]); cmp(a[1], a[7]); cmp(a[2], a[9]); cmp(a[3], a[4]); cmp(a[8], a[12]); cmp(a[10], a[13]); cmp(a[14], a[36]); cmp(a[15], a[25]); cmp(a[16], a[21]); cmp(a[17], a[23]); cmp(a[18], a[26]); cmp(a[19], a[20]); cmp(a[22], a[29]); cmp(a[24], a[30]); cmp(a[27], a[28]); cmp(a[31], a[41]); cmp(a[32], a[37]); cmp(a[33], a[39]); cmp(a[34], a[42]); cmp(a[35], a[40]); cmp(a[38], a[45]); cmp(a[43], a[44]);
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[8]); cmp(a[7], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[31]); cmp(a[15], a[19]); cmp(a[16], a[17]); cmp(a[18], a[27]); cmp(a[20], a[21]); cmp(a[22], a[24]); cmp(a[23], a[25]); cmp(a[26], a[30]); cmp(a[28], a[29]); cmp(a[32], a[33]); cmp(a[34], a[43]); cmp(a[35], a[38]); cmp(a[36], a[37]); cmp(a[39], a[41]); cmp(a[40], a[42]); cmp(a[44], a[45]);
@@ -752,7 +807,8 @@ inline constexpr void sort46(int* a) noexcept {
 }
 
 // 47 inputs, 340 CEs
-inline constexpr void sort47(int* a) noexcept {
+template <typename T>
+inline constexpr void sort47(T* a) noexcept {
     cmp(a[1], a[12]); cmp(a[2], a[13]); cmp(a[3], a[14]); cmp(a[4], a[8]); cmp(a[5], a[6]); cmp(a[7], a[11]); cmp(a[9], a[10]); cmp(a[15], a[18]); cmp(a[16], a[29]); cmp(a[17], a[28]); cmp(a[19], a[30]); cmp(a[20], a[24]); cmp(a[21], a[22]); cmp(a[23], a[27]); cmp(a[25], a[26]); cmp(a[31], a[34]); cmp(a[32], a[45]); cmp(a[33], a[44]); cmp(a[35], a[46]); cmp(a[36], a[40]); cmp(a[37], a[38]); cmp(a[39], a[43]); cmp(a[41], a[42]);
     cmp(a[0], a[5]); cmp(a[1], a[7]); cmp(a[2], a[9]); cmp(a[3], a[4]); cmp(a[8], a[14]); cmp(a[10], a[13]); cmp(a[11], a[12]); cmp(a[15], a[25]); cmp(a[16], a[21]); cmp(a[17], a[23]); cmp(a[18], a[26]); cmp(a[19], a[20]); cmp(a[22], a[29]); cmp(a[24], a[30]); cmp(a[27], a[28]); cmp(a[31], a[41]); cmp(a[32], a[37]); cmp(a[33], a[39]); cmp(a[34], a[42]); cmp(a[35], a[36]); cmp(a[38], a[45]); cmp(a[40], a[46]); cmp(a[43], a[44]);
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[8]); cmp(a[7], a[9]); cmp(a[10], a[11]); cmp(a[13], a[14]); cmp(a[15], a[19]); cmp(a[16], a[17]); cmp(a[18], a[27]); cmp(a[20], a[21]); cmp(a[22], a[24]); cmp(a[23], a[25]); cmp(a[26], a[30]); cmp(a[28], a[29]); cmp(a[31], a[35]); cmp(a[32], a[33]); cmp(a[34], a[43]); cmp(a[36], a[37]); cmp(a[38], a[40]); cmp(a[39], a[41]); cmp(a[42], a[46]); cmp(a[44], a[45]);
@@ -775,7 +831,8 @@ inline constexpr void sort47(int* a) noexcept {
 }
 
 // 48 inputs, 346 CEs
-inline constexpr void sort48(int* a) noexcept {
+template <typename T>
+inline constexpr void sort48(T* a) noexcept {
     cmp(a[0], a[13]); cmp(a[1], a[12]); cmp(a[2], a[15]); cmp(a[3], a[14]); cmp(a[4], a[8]); cmp(a[5], a[6]); cmp(a[7], a[11]); cmp(a[9], a[10]); cmp(a[16], a[29]); cmp(a[17], a[28]); cmp(a[18], a[31]); cmp(a[19], a[30]); cmp(a[20], a[24]); cmp(a[21], a[22]); cmp(a[23], a[27]); cmp(a[25], a[26]); cmp(a[32], a[45]); cmp(a[33], a[44]); cmp(a[34], a[47]); cmp(a[35], a[46]); cmp(a[36], a[40]); cmp(a[37], a[38]); cmp(a[39], a[43]); cmp(a[41], a[42]);
     cmp(a[0], a[5]); cmp(a[1], a[7]); cmp(a[2], a[9]); cmp(a[3], a[4]); cmp(a[6], a[13]); cmp(a[8], a[14]); cmp(a[10], a[15]); cmp(a[11], a[12]); cmp(a[16], a[21]); cmp(a[17], a[23]); cmp(a[18], a[25]); cmp(a[19], a[20]); cmp(a[22], a[29]); cmp(a[24], a[30]); cmp(a[26], a[31]); cmp(a[27], a[28]); cmp(a[32], a[37]); cmp(a[33], a[39]); cmp(a[34], a[41]); cmp(a[35], a[36]); cmp(a[38], a[45]); cmp(a[40], a[46]); cmp(a[42], a[47]); cmp(a[43], a[44]);
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[8]); cmp(a[7], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[17]); cmp(a[18], a[19]); cmp(a[20], a[21]); cmp(a[22], a[24]); cmp(a[23], a[25]); cmp(a[26], a[27]); cmp(a[28], a[29]); cmp(a[30], a[31]); cmp(a[32], a[33]); cmp(a[34], a[35]); cmp(a[36], a[37]); cmp(a[38], a[40]); cmp(a[39], a[41]); cmp(a[42], a[43]); cmp(a[44], a[45]); cmp(a[46], a[47]);
@@ -798,7 +855,8 @@ inline constexpr void sort48(int* a) noexcept {
 }
 
 // 49 inputs, 365 CEs
-inline constexpr void sort49(int* a) noexcept {
+template <typename T>
+inline constexpr void sort49(T* a) noexcept {
     cmp(a[0], a[8]); cmp(a[1], a[7]); cmp(a[2], a[6]); cmp(a[3], a[11]); cmp(a[4], a[10]); cmp(a[5], a[9]); cmp(a[12], a[20]); cmp(a[13], a[19]); cmp(a[14], a[18]); cmp(a[15], a[23]); cmp(a[16], a[22]); cmp(a[17], a[21]); cmp(a[24], a[32]); cmp(a[25], a[31]); cmp(a[26], a[30]); cmp(a[27], a[35]); cmp(a[28], a[34]); cmp(a[29], a[33]); cmp(a[36], a[48]); cmp(a[37], a[46]); cmp(a[38], a[45]); cmp(a[39], a[43]); cmp(a[41], a[47]); cmp(a[42], a[44]);
     cmp(a[0], a[1]); cmp(a[2], a[5]); cmp(a[3], a[4]); cmp(a[6], a[9]); cmp(a[7], a[8]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[17]); cmp(a[15], a[16]); cmp(a[18], a[21]); cmp(a[19], a[20]); cmp(a[22], a[23]); cmp(a[24], a[25]); cmp(a[26], a[29]); cmp(a[27], a[28]); cmp(a[30], a[33]); cmp(a[31], a[32]); cmp(a[34], a[35]); cmp(a[37], a[42]); cmp(a[38], a[39]); cmp(a[40], a[47]); cmp(a[43], a[45]); cmp(a[44], a[46]);
     cmp(a[0], a[2]); cmp(a[1], a[6]); cmp(a[5], a[10]); cmp(a[9], a[11]); cmp(a[12], a[14]); cmp(a[13], a[18]); cmp(a[17], a[22]); cmp(a[21], a[23]); cmp(a[24], a[26]); cmp(a[25], a[30]); cmp(a[29], a[34]); cmp(a[33], a[35]); cmp(a[36], a[40]); cmp(a[37], a[38]); cmp(a[39], a[42]); cmp(a[43], a[44]); cmp(a[45], a[46]); cmp(a[47], a[48]);
@@ -823,7 +881,8 @@ inline constexpr void sort49(int* a) noexcept {
 }
 
 // 50 inputs, 376 CEs
-inline constexpr void sort50(int* a) noexcept {
+template <typename T>
+inline constexpr void sort50(T* a) noexcept {
     cmp(a[0], a[8]); cmp(a[1], a[7]); cmp(a[2], a[6]); cmp(a[3], a[11]); cmp(a[4], a[10]); cmp(a[5], a[9]); cmp(a[12], a[24]); cmp(a[13], a[22]); cmp(a[14], a[21]); cmp(a[15], a[19]); cmp(a[17], a[23]); cmp(a[18], a[20]); cmp(a[25], a[33]); cmp(a[26], a[32]); cmp(a[27], a[31]); cmp(a[28], a[36]); cmp(a[29], a[35]); cmp(a[30], a[34]); cmp(a[37], a[49]); cmp(a[38], a[47]); cmp(a[39], a[46]); cmp(a[40], a[44]); cmp(a[42], a[48]); cmp(a[43], a[45]);
     cmp(a[0], a[1]); cmp(a[2], a[5]); cmp(a[3], a[4]); cmp(a[6], a[9]); cmp(a[7], a[8]); cmp(a[10], a[11]); cmp(a[13], a[18]); cmp(a[14], a[15]); cmp(a[16], a[23]); cmp(a[19], a[21]); cmp(a[20], a[22]); cmp(a[25], a[26]); cmp(a[27], a[30]); cmp(a[28], a[29]); cmp(a[31], a[34]); cmp(a[32], a[33]); cmp(a[35], a[36]); cmp(a[38], a[43]); cmp(a[39], a[40]); cmp(a[41], a[48]); cmp(a[44], a[46]); cmp(a[45], a[47]);
     cmp(a[0], a[2]); cmp(a[1], a[6]); cmp(a[5], a[10]); cmp(a[9], a[11]); cmp(a[12], a[16]); cmp(a[13], a[14]); cmp(a[15], a[18]); cmp(a[19], a[20]); cmp(a[21], a[22]); cmp(a[23], a[24]); cmp(a[25], a[27]); cmp(a[26], a[31]); cmp(a[30], a[35]); cmp(a[34], a[36]); cmp(a[37], a[41]); cmp(a[38], a[39]); cmp(a[40], a[43]); cmp(a[44], a[45]); cmp(a[46], a[47]); cmp(a[48], a[49]);
@@ -848,7 +907,8 @@ inline constexpr void sort50(int* a) noexcept {
 }
 
 // 51 inputs, 387 CEs
-inline constexpr void sort51(int* a) noexcept {
+template <typename T>
+inline constexpr void sort51(T* a) noexcept {
     cmp(a[0], a[8]); cmp(a[1], a[7]); cmp(a[2], a[6]); cmp(a[3], a[11]); cmp(a[4], a[10]); cmp(a[5], a[9]); cmp(a[12], a[24]); cmp(a[13], a[22]); cmp(a[14], a[21]); cmp(a[15], a[19]); cmp(a[17], a[23]); cmp(a[18], a[20]); cmp(a[25], a[37]); cmp(a[26], a[35]); cmp(a[27], a[34]); cmp(a[28], a[32]); cmp(a[30], a[36]); cmp(a[31], a[33]); cmp(a[38], a[50]); cmp(a[39], a[48]); cmp(a[40], a[47]); cmp(a[41], a[45]); cmp(a[43], a[49]); cmp(a[44], a[46]);
     cmp(a[0], a[1]); cmp(a[2], a[5]); cmp(a[3], a[4]); cmp(a[6], a[9]); cmp(a[7], a[8]); cmp(a[10], a[11]); cmp(a[13], a[18]); cmp(a[14], a[15]); cmp(a[16], a[23]); cmp(a[19], a[21]); cmp(a[20], a[22]); cmp(a[26], a[31]); cmp(a[27], a[28]); cmp(a[29], a[36]); cmp(a[32], a[34]); cmp(a[33], a[35]); cmp(a[39], a[44]); cmp(a[40], a[41]); cmp(a[42], a[49]); cmp(a[45], a[47]); cmp(a[46], a[48]);
     cmp(a[0], a[2]); cmp(a[1], a[6]); cmp(a[5], a[10]); cmp(a[9], a[11]); cmp(a[12], a[16]); cmp(a[13], a[14]); cmp(a[15], a[18]); cmp(a[19], a[20]); cmp(a[21], a[22]); cmp(a[23], a[24]); cmp(a[25], a[29]); cmp(a[26], a[27]); cmp(a[28], a[31]); cmp(a[32], a[33]); cmp(a[34], a[35]); cmp(a[36], a[37]); cmp(a[38], a[42]); cmp(a[39], a[40]); cmp(a[41], a[44]); cmp(a[45], a[46]); cmp(a[47], a[48]); cmp(a[49], a[50]);
@@ -874,7 +934,8 @@ inline constexpr void sort51(int* a) noexcept {
 }
 
 // 52 inputs, 395 CEs
-inline constexpr void sort52(int* a) noexcept {
+template <typename T>
+inline constexpr void sort52(T* a) noexcept {
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[6]); cmp(a[5], a[7]); cmp(a[8], a[10]); cmp(a[9], a[11]); cmp(a[12], a[14]); cmp(a[13], a[15]); cmp(a[16], a[18]); cmp(a[17], a[19]); cmp(a[20], a[22]); cmp(a[21], a[23]); cmp(a[24], a[26]); cmp(a[25], a[27]); cmp(a[28], a[30]); cmp(a[29], a[31]); cmp(a[32], a[34]); cmp(a[33], a[35]); cmp(a[36], a[38]); cmp(a[37], a[39]); cmp(a[40], a[42]); cmp(a[41], a[43]); cmp(a[44], a[46]); cmp(a[45], a[47]); cmp(a[48], a[50]); cmp(a[49], a[51]);
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[17]); cmp(a[18], a[19]); cmp(a[20], a[21]); cmp(a[22], a[23]); cmp(a[24], a[25]); cmp(a[26], a[27]); cmp(a[28], a[29]); cmp(a[30], a[31]); cmp(a[32], a[33]); cmp(a[34], a[35]); cmp(a[36], a[37]); cmp(a[38], a[39]); cmp(a[40], a[41]); cmp(a[42], a[43]); cmp(a[44], a[45]); cmp(a[46], a[47]); cmp(a[48], a[49]); cmp(a[50], a[51]);
     cmp(a[0], a[48]); cmp(a[1], a[2]); cmp(a[3], a[51]); cmp(a[4], a[40]); cmp(a[5], a[6]); cmp(a[7], a[31]); cmp(a[8], a[36]); cmp(a[9], a[10]); cmp(a[11], a[47]); cmp(a[12], a[28]); cmp(a[13], a[14]); cmp(a[15], a[43]); cmp(a[17], a[18]); cmp(a[19], a[27]); cmp(a[20], a[44]); cmp(a[21], a[22]); cmp(a[23], a[39]); cmp(a[24], a[32]); cmp(a[25], a[26]); cmp(a[29], a[30]); cmp(a[33], a[34]); cmp(a[37], a[38]); cmp(a[41], a[42]); cmp(a[45], a[46]); cmp(a[49], a[50]);
@@ -898,7 +959,8 @@ inline constexpr void sort52(int* a) noexcept {
 }
 
 // 53 inputs, 411 CEs
-inline constexpr void sort53(int* a) noexcept {
+template <typename T>
+inline constexpr void sort53(T* a) noexcept {
     cmp(a[0], a[12]); cmp(a[1], a[10]); cmp(a[2], a[9]); cmp(a[3], a[7]); cmp(a[5], a[11]); cmp(a[6], a[8]); cmp(a[13], a[25]); cmp(a[14], a[23]); cmp(a[15], a[22]); cmp(a[16], a[20]); cmp(a[18], a[24]); cmp(a[19], a[21]); cmp(a[26], a[38]); cmp(a[27], a[36]); cmp(a[28], a[35]); cmp(a[29], a[33]); cmp(a[31], a[37]); cmp(a[32], a[34]); cmp(a[39], a[45]); cmp(a[40], a[50]); cmp(a[41], a[51]); cmp(a[42], a[49]); cmp(a[43], a[44]); cmp(a[46], a[52]); cmp(a[47], a[48]);
     cmp(a[1], a[6]); cmp(a[2], a[3]); cmp(a[4], a[11]); cmp(a[7], a[9]); cmp(a[8], a[10]); cmp(a[14], a[19]); cmp(a[15], a[16]); cmp(a[17], a[24]); cmp(a[20], a[22]); cmp(a[21], a[23]); cmp(a[27], a[32]); cmp(a[28], a[29]); cmp(a[30], a[37]); cmp(a[33], a[35]); cmp(a[34], a[36]); cmp(a[40], a[41]); cmp(a[42], a[46]); cmp(a[43], a[47]); cmp(a[44], a[48]); cmp(a[45], a[49]); cmp(a[50], a[51]);
     cmp(a[0], a[4]); cmp(a[1], a[2]); cmp(a[3], a[6]); cmp(a[7], a[8]); cmp(a[9], a[10]); cmp(a[11], a[12]); cmp(a[13], a[17]); cmp(a[14], a[15]); cmp(a[16], a[19]); cmp(a[20], a[21]); cmp(a[22], a[23]); cmp(a[24], a[25]); cmp(a[26], a[30]); cmp(a[27], a[28]); cmp(a[29], a[32]); cmp(a[33], a[34]); cmp(a[35], a[36]); cmp(a[37], a[38]); cmp(a[39], a[43]); cmp(a[40], a[42]); cmp(a[44], a[45]); cmp(a[46], a[47]); cmp(a[48], a[52]); cmp(a[49], a[51]);
@@ -924,7 +986,8 @@ inline constexpr void sort53(int* a) noexcept {
 }
 
 // 54 inputs, 421 CEs
-inline constexpr void sort54(int* a) noexcept {
+template <typename T>
+inline constexpr void sort54(T* a) noexcept {
     cmp(a[0], a[13]); cmp(a[1], a[12]); cmp(a[2], a[15]); cmp(a[3], a[14]); cmp(a[4], a[8]); cmp(a[5], a[6]); cmp(a[7], a[11]); cmp(a[9], a[10]); cmp(a[16], a[35]); cmp(a[17], a[34]); cmp(a[18], a[37]); cmp(a[19], a[36]); cmp(a[20], a[30]); cmp(a[21], a[22]); cmp(a[23], a[33]); cmp(a[24], a[29]); cmp(a[25], a[27]); cmp(a[26], a[28]); cmp(a[31], a[32]); cmp(a[38], a[51]); cmp(a[39], a[50]); cmp(a[40], a[53]); cmp(a[41], a[52]); cmp(a[42], a[46]); cmp(a[43], a[44]); cmp(a[45], a[49]); cmp(a[47], a[48]);
     cmp(a[0], a[5]); cmp(a[1], a[7]); cmp(a[2], a[9]); cmp(a[3], a[4]); cmp(a[6], a[13]); cmp(a[8], a[14]); cmp(a[10], a[15]); cmp(a[11], a[12]); cmp(a[16], a[21]); cmp(a[17], a[23]); cmp(a[18], a[31]); cmp(a[19], a[20]); cmp(a[22], a[35]); cmp(a[25], a[26]); cmp(a[27], a[28]); cmp(a[30], a[36]); cmp(a[32], a[37]); cmp(a[33], a[34]); cmp(a[38], a[43]); cmp(a[39], a[45]); cmp(a[40], a[47]); cmp(a[41], a[42]); cmp(a[44], a[51]); cmp(a[46], a[52]); cmp(a[48], a[53]); cmp(a[49], a[50]);
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[8]); cmp(a[7], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[17]); cmp(a[18], a[19]); cmp(a[20], a[21]); cmp(a[22], a[30]); cmp(a[23], a[31]); cmp(a[24], a[27]); cmp(a[26], a[29]); cmp(a[32], a[33]); cmp(a[34], a[35]); cmp(a[36], a[37]); cmp(a[38], a[39]); cmp(a[40], a[41]); cmp(a[42], a[43]); cmp(a[44], a[46]); cmp(a[45], a[47]); cmp(a[48], a[49]); cmp(a[50], a[51]); cmp(a[52], a[53]);
@@ -948,7 +1011,8 @@ inline constexpr void sort54(int* a) noexcept {
 }
 
 // 55 inputs, 432 CEs
-inline constexpr void sort55(int* a) noexcept {
+template <typename T>
+inline constexpr void sort55(T* a) noexcept {
     cmp(a[1], a[12]); cmp(a[2], a[13]); cmp(a[3], a[14]); cmp(a[4], a[8]); cmp(a[5], a[6]); cmp(a[7], a[11]); cmp(a[9], a[10]); cmp(a[15], a[18]); cmp(a[16], a[37]); cmp(a[17], a[36]); cmp(a[19], a[38]); cmp(a[20], a[32]); cmp(a[21], a[22]); cmp(a[23], a[35]); cmp(a[24], a[26]); cmp(a[25], a[27]); cmp(a[28], a[30]); cmp(a[29], a[31]); cmp(a[33], a[34]); cmp(a[39], a[42]); cmp(a[40], a[53]); cmp(a[41], a[52]); cmp(a[43], a[54]); cmp(a[44], a[48]); cmp(a[45], a[46]); cmp(a[47], a[51]); cmp(a[49], a[50]);
     cmp(a[0], a[5]); cmp(a[1], a[7]); cmp(a[2], a[9]); cmp(a[3], a[4]); cmp(a[8], a[14]); cmp(a[10], a[13]); cmp(a[11], a[12]); cmp(a[15], a[33]); cmp(a[16], a[21]); cmp(a[17], a[23]); cmp(a[18], a[34]); cmp(a[19], a[20]); cmp(a[22], a[37]); cmp(a[24], a[28]); cmp(a[25], a[29]); cmp(a[26], a[30]); cmp(a[27], a[31]); cmp(a[32], a[38]); cmp(a[35], a[36]); cmp(a[39], a[49]); cmp(a[40], a[45]); cmp(a[41], a[47]); cmp(a[42], a[50]); cmp(a[43], a[44]); cmp(a[46], a[53]); cmp(a[48], a[54]); cmp(a[51], a[52]);
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[8]); cmp(a[7], a[9]); cmp(a[10], a[11]); cmp(a[13], a[14]); cmp(a[15], a[19]); cmp(a[16], a[17]); cmp(a[18], a[35]); cmp(a[20], a[21]); cmp(a[22], a[32]); cmp(a[23], a[33]); cmp(a[24], a[25]); cmp(a[26], a[27]); cmp(a[28], a[29]); cmp(a[30], a[31]); cmp(a[34], a[38]); cmp(a[36], a[37]); cmp(a[39], a[43]); cmp(a[40], a[41]); cmp(a[42], a[51]); cmp(a[44], a[45]); cmp(a[46], a[48]); cmp(a[47], a[49]); cmp(a[50], a[54]); cmp(a[52], a[53]);
@@ -972,7 +1036,8 @@ inline constexpr void sort55(int* a) noexcept {
 }
 
 // 56 inputs, 438 CEs
-inline constexpr void sort56(int* a) noexcept {
+template <typename T>
+inline constexpr void sort56(T* a) noexcept {
     cmp(a[0], a[13]); cmp(a[1], a[12]); cmp(a[2], a[15]); cmp(a[3], a[14]); cmp(a[4], a[8]); cmp(a[5], a[6]); cmp(a[7], a[11]); cmp(a[9], a[10]); cmp(a[16], a[37]); cmp(a[17], a[36]); cmp(a[18], a[39]); cmp(a[19], a[38]); cmp(a[20], a[32]); cmp(a[21], a[22]); cmp(a[23], a[35]); cmp(a[24], a[26]); cmp(a[25], a[27]); cmp(a[28], a[30]); cmp(a[29], a[31]); cmp(a[33], a[34]); cmp(a[40], a[53]); cmp(a[41], a[52]); cmp(a[42], a[55]); cmp(a[43], a[54]); cmp(a[44], a[48]); cmp(a[45], a[46]); cmp(a[47], a[51]); cmp(a[49], a[50]);
     cmp(a[0], a[5]); cmp(a[1], a[7]); cmp(a[2], a[9]); cmp(a[3], a[4]); cmp(a[6], a[13]); cmp(a[8], a[14]); cmp(a[10], a[15]); cmp(a[11], a[12]); cmp(a[16], a[21]); cmp(a[17], a[23]); cmp(a[18], a[33]); cmp(a[19], a[20]); cmp(a[22], a[37]); cmp(a[24], a[28]); cmp(a[25], a[29]); cmp(a[26], a[30]); cmp(a[27], a[31]); cmp(a[32], a[38]); cmp(a[34], a[39]); cmp(a[35], a[36]); cmp(a[40], a[45]); cmp(a[41], a[47]); cmp(a[42], a[49]); cmp(a[43], a[44]); cmp(a[46], a[53]); cmp(a[48], a[54]); cmp(a[50], a[55]); cmp(a[51], a[52]);
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[8]); cmp(a[7], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[17]); cmp(a[18], a[19]); cmp(a[20], a[21]); cmp(a[22], a[32]); cmp(a[23], a[33]); cmp(a[24], a[25]); cmp(a[26], a[27]); cmp(a[28], a[29]); cmp(a[30], a[31]); cmp(a[34], a[35]); cmp(a[36], a[37]); cmp(a[38], a[39]); cmp(a[40], a[41]); cmp(a[42], a[43]); cmp(a[44], a[45]); cmp(a[46], a[48]); cmp(a[47], a[49]); cmp(a[50], a[51]); cmp(a[52], a[53]); cmp(a[54], a[55]);
@@ -996,7 +1061,8 @@ inline constexpr void sort56(int* a) noexcept {
 }
 
 // 57 inputs, 454 CEs
-inline constexpr void sort57(int* a) noexcept {
+template <typename T>
+inline constexpr void sort57(T* a) noexcept {
     cmp(a[0], a[8]); cmp(a[1], a[7]); cmp(a[2], a[6]); cmp(a[3], a[11]); cmp(a[4], a[10]); cmp(a[5], a[9]); cmp(a[12], a[24]); cmp(a[13], a[22]); cmp(a[14], a[21]); cmp(a[15], a[19]); cmp(a[17], a[23]); cmp(a[18], a[20]); cmp(a[25], a[38]); cmp(a[26], a[37]); cmp(a[27], a[40]); cmp(a[28], a[39]); cmp(a[29], a[33]); cmp(a[30], a[31]); cmp(a[32], a[36]); cmp(a[34], a[35]); cmp(a[41], a[54]); cmp(a[42], a[53]); cmp(a[43], a[56]); cmp(a[44], a[55]); cmp(a[45], a[49]); cmp(a[46], a[47]); cmp(a[48], a[52]); cmp(a[50], a[51]);
     cmp(a[0], a[1]); cmp(a[2], a[5]); cmp(a[3], a[4]); cmp(a[6], a[9]); cmp(a[7], a[8]); cmp(a[10], a[11]); cmp(a[13], a[18]); cmp(a[14], a[15]); cmp(a[16], a[23]); cmp(a[19], a[21]); cmp(a[20], a[22]); cmp(a[25], a[30]); cmp(a[26], a[32]); cmp(a[27], a[34]); cmp(a[28], a[29]); cmp(a[31], a[38]); cmp(a[33], a[39]); cmp(a[35], a[40]); cmp(a[36], a[37]); cmp(a[41], a[46]); cmp(a[42], a[48]); cmp(a[43], a[50]); cmp(a[44], a[45]); cmp(a[47], a[54]); cmp(a[49], a[55]); cmp(a[51], a[56]); cmp(a[52], a[53]);
     cmp(a[0], a[2]); cmp(a[1], a[6]); cmp(a[5], a[10]); cmp(a[9], a[11]); cmp(a[12], a[16]); cmp(a[13], a[14]); cmp(a[15], a[18]); cmp(a[19], a[20]); cmp(a[21], a[22]); cmp(a[23], a[24]); cmp(a[25], a[26]); cmp(a[27], a[28]); cmp(a[29], a[30]); cmp(a[31], a[33]); cmp(a[32], a[34]); cmp(a[35], a[36]); cmp(a[37], a[38]); cmp(a[39], a[40]); cmp(a[41], a[42]); cmp(a[43], a[44]); cmp(a[45], a[46]); cmp(a[47], a[49]); cmp(a[48], a[50]); cmp(a[51], a[52]); cmp(a[53], a[54]); cmp(a[55], a[56]);
@@ -1021,7 +1087,8 @@ inline constexpr void sort57(int* a) noexcept {
 }
 
 // 58 inputs, 465 CEs
-inline constexpr void sort58(int* a) noexcept {
+template <typename T>
+inline constexpr void sort58(T* a) noexcept {
     cmp(a[0], a[8]); cmp(a[1], a[9]); cmp(a[2], a[7]); cmp(a[3], a[5]); cmp(a[4], a[6]); cmp(a[10], a[23]); cmp(a[11], a[22]); cmp(a[12], a[25]); cmp(a[13], a[24]); cmp(a[14], a[18]); cmp(a[15], a[16]); cmp(a[17], a[21]); cmp(a[19], a[20]); cmp(a[26], a[39]); cmp(a[27], a[38]); cmp(a[28], a[41]); cmp(a[29], a[40]); cmp(a[30], a[34]); cmp(a[31], a[32]); cmp(a[33], a[37]); cmp(a[35], a[36]); cmp(a[42], a[55]); cmp(a[43], a[54]); cmp(a[44], a[57]); cmp(a[45], a[56]); cmp(a[46], a[50]); cmp(a[47], a[48]); cmp(a[49], a[53]); cmp(a[51], a[52]);
     cmp(a[0], a[2]); cmp(a[1], a[4]); cmp(a[5], a[8]); cmp(a[7], a[9]); cmp(a[10], a[15]); cmp(a[11], a[17]); cmp(a[12], a[19]); cmp(a[13], a[14]); cmp(a[16], a[23]); cmp(a[18], a[24]); cmp(a[20], a[25]); cmp(a[21], a[22]); cmp(a[26], a[31]); cmp(a[27], a[33]); cmp(a[28], a[35]); cmp(a[29], a[30]); cmp(a[32], a[39]); cmp(a[34], a[40]); cmp(a[36], a[41]); cmp(a[37], a[38]); cmp(a[42], a[47]); cmp(a[43], a[49]); cmp(a[44], a[51]); cmp(a[45], a[46]); cmp(a[48], a[55]); cmp(a[50], a[56]); cmp(a[52], a[57]); cmp(a[53], a[54]);
     cmp(a[0], a[3]); cmp(a[2], a[4]); cmp(a[5], a[7]); cmp(a[6], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[18]); cmp(a[17], a[19]); cmp(a[20], a[21]); cmp(a[22], a[23]); cmp(a[24], a[25]); cmp(a[26], a[27]); cmp(a[28], a[29]); cmp(a[30], a[31]); cmp(a[32], a[34]); cmp(a[33], a[35]); cmp(a[36], a[37]); cmp(a[38], a[39]); cmp(a[40], a[41]); cmp(a[42], a[43]); cmp(a[44], a[45]); cmp(a[46], a[47]); cmp(a[48], a[50]); cmp(a[49], a[51]); cmp(a[52], a[53]); cmp(a[54], a[55]); cmp(a[56], a[57]);
@@ -1046,7 +1113,8 @@ inline constexpr void sort58(int* a) noexcept {
 }
 
 // 59 inputs, 476 CEs
-inline constexpr void sort59(int* a) noexcept {
+template <typename T>
+inline constexpr void sort59(T* a) noexcept {
     cmp(a[0], a[9]); cmp(a[1], a[6]); cmp(a[2], a[4]); cmp(a[3], a[7]); cmp(a[5], a[8]); cmp(a[11], a[24]); cmp(a[12], a[23]); cmp(a[13], a[26]); cmp(a[14], a[25]); cmp(a[15], a[19]); cmp(a[16], a[17]); cmp(a[18], a[22]); cmp(a[20], a[21]); cmp(a[27], a[40]); cmp(a[28], a[39]); cmp(a[29], a[42]); cmp(a[30], a[41]); cmp(a[31], a[35]); cmp(a[32], a[33]); cmp(a[34], a[38]); cmp(a[36], a[37]); cmp(a[43], a[56]); cmp(a[44], a[55]); cmp(a[45], a[58]); cmp(a[46], a[57]); cmp(a[47], a[51]); cmp(a[48], a[49]); cmp(a[50], a[54]); cmp(a[52], a[53]);
     cmp(a[0], a[1]); cmp(a[3], a[5]); cmp(a[4], a[10]); cmp(a[6], a[9]); cmp(a[7], a[8]); cmp(a[11], a[16]); cmp(a[12], a[18]); cmp(a[13], a[20]); cmp(a[14], a[15]); cmp(a[17], a[24]); cmp(a[19], a[25]); cmp(a[21], a[26]); cmp(a[22], a[23]); cmp(a[27], a[32]); cmp(a[28], a[34]); cmp(a[29], a[36]); cmp(a[30], a[31]); cmp(a[33], a[40]); cmp(a[35], a[41]); cmp(a[37], a[42]); cmp(a[38], a[39]); cmp(a[43], a[48]); cmp(a[44], a[50]); cmp(a[45], a[52]); cmp(a[46], a[47]); cmp(a[49], a[56]); cmp(a[51], a[57]); cmp(a[53], a[58]); cmp(a[54], a[55]);
     cmp(a[1], a[3]); cmp(a[2], a[5]); cmp(a[4], a[7]); cmp(a[8], a[10]); cmp(a[11], a[12]); cmp(a[13], a[14]); cmp(a[15], a[16]); cmp(a[17], a[19]); cmp(a[18], a[20]); cmp(a[21], a[22]); cmp(a[23], a[24]); cmp(a[25], a[26]); cmp(a[27], a[28]); cmp(a[29], a[30]); cmp(a[31], a[32]); cmp(a[33], a[35]); cmp(a[34], a[36]); cmp(a[37], a[38]); cmp(a[39], a[40]); cmp(a[41], a[42]); cmp(a[43], a[44]); cmp(a[45], a[46]); cmp(a[47], a[48]); cmp(a[49], a[51]); cmp(a[50], a[52]); cmp(a[53], a[54]); cmp(a[55], a[56]); cmp(a[57], a[58]);
@@ -1071,7 +1139,8 @@ inline constexpr void sort59(int* a) noexcept {
 }
 
 // 60 inputs, 483 CEs
-inline constexpr void sort60(int* a) noexcept {
+template <typename T>
+inline constexpr void sort60(T* a) noexcept {
     cmp(a[1], a[2]); cmp(a[3], a[10]); cmp(a[4], a[14]); cmp(a[5], a[8]); cmp(a[6], a[13]); cmp(a[7], a[12]); cmp(a[9], a[11]); cmp(a[16], a[17]); cmp(a[18], a[25]); cmp(a[19], a[29]); cmp(a[20], a[23]); cmp(a[21], a[28]); cmp(a[22], a[27]); cmp(a[24], a[26]); cmp(a[31], a[32]); cmp(a[33], a[40]); cmp(a[34], a[44]); cmp(a[35], a[38]); cmp(a[36], a[43]); cmp(a[37], a[42]); cmp(a[39], a[41]); cmp(a[46], a[47]); cmp(a[48], a[55]); cmp(a[49], a[59]); cmp(a[50], a[53]); cmp(a[51], a[58]); cmp(a[52], a[57]); cmp(a[54], a[56]);
     cmp(a[0], a[14]); cmp(a[1], a[5]); cmp(a[2], a[8]); cmp(a[3], a[7]); cmp(a[6], a[9]); cmp(a[10], a[12]); cmp(a[11], a[13]); cmp(a[15], a[29]); cmp(a[16], a[20]); cmp(a[17], a[23]); cmp(a[18], a[22]); cmp(a[21], a[24]); cmp(a[25], a[27]); cmp(a[26], a[28]); cmp(a[30], a[44]); cmp(a[31], a[35]); cmp(a[32], a[38]); cmp(a[33], a[37]); cmp(a[36], a[39]); cmp(a[40], a[42]); cmp(a[41], a[43]); cmp(a[45], a[59]); cmp(a[46], a[50]); cmp(a[47], a[53]); cmp(a[48], a[52]); cmp(a[51], a[54]); cmp(a[55], a[57]); cmp(a[56], a[58]);
     cmp(a[0], a[7]); cmp(a[1], a[6]); cmp(a[2], a[9]); cmp(a[4], a[10]); cmp(a[5], a[11]); cmp(a[8], a[13]); cmp(a[12], a[14]); cmp(a[15], a[22]); cmp(a[16], a[21]); cmp(a[17], a[24]); cmp(a[19], a[25]); cmp(a[20], a[26]); cmp(a[23], a[28]); cmp(a[27], a[29]); cmp(a[30], a[37]); cmp(a[31], a[36]); cmp(a[32], a[39]); cmp(a[34], a[40]); cmp(a[35], a[41]); cmp(a[38], a[43]); cmp(a[42], a[44]); cmp(a[45], a[52]); cmp(a[46], a[51]); cmp(a[47], a[54]); cmp(a[49], a[55]); cmp(a[50], a[56]); cmp(a[53], a[58]); cmp(a[57], a[59]);
@@ -1096,7 +1165,8 @@ inline constexpr void sort60(int* a) noexcept {
 }
 
 // 61 inputs, 497 CEs
-inline constexpr void sort61(int* a) noexcept {
+template <typename T>
+inline constexpr void sort61(T* a) noexcept {
     cmp(a[1], a[2]); cmp(a[3], a[10]); cmp(a[4], a[14]); cmp(a[5], a[8]); cmp(a[6], a[13]); cmp(a[7], a[12]); cmp(a[9], a[11]); cmp(a[16], a[17]); cmp(a[18], a[25]); cmp(a[19], a[29]); cmp(a[20], a[23]); cmp(a[21], a[28]); cmp(a[22], a[27]); cmp(a[24], a[26]); cmp(a[31], a[32]); cmp(a[33], a[40]); cmp(a[34], a[44]); cmp(a[35], a[38]); cmp(a[36], a[43]); cmp(a[37], a[42]); cmp(a[39], a[41]); cmp(a[45], a[58]); cmp(a[46], a[57]); cmp(a[47], a[60]); cmp(a[48], a[59]); cmp(a[49], a[53]); cmp(a[50], a[51]); cmp(a[52], a[56]); cmp(a[54], a[55]);
     cmp(a[0], a[14]); cmp(a[1], a[5]); cmp(a[2], a[8]); cmp(a[3], a[7]); cmp(a[6], a[9]); cmp(a[10], a[12]); cmp(a[11], a[13]); cmp(a[15], a[29]); cmp(a[16], a[20]); cmp(a[17], a[23]); cmp(a[18], a[22]); cmp(a[21], a[24]); cmp(a[25], a[27]); cmp(a[26], a[28]); cmp(a[30], a[44]); cmp(a[31], a[35]); cmp(a[32], a[38]); cmp(a[33], a[37]); cmp(a[36], a[39]); cmp(a[40], a[42]); cmp(a[41], a[43]); cmp(a[45], a[50]); cmp(a[46], a[52]); cmp(a[47], a[54]); cmp(a[48], a[49]); cmp(a[51], a[58]); cmp(a[53], a[59]); cmp(a[55], a[60]); cmp(a[56], a[57]);
     cmp(a[0], a[7]); cmp(a[1], a[6]); cmp(a[2], a[9]); cmp(a[4], a[10]); cmp(a[5], a[11]); cmp(a[8], a[13]); cmp(a[12], a[14]); cmp(a[15], a[22]); cmp(a[16], a[21]); cmp(a[17], a[24]); cmp(a[19], a[25]); cmp(a[20], a[26]); cmp(a[23], a[28]); cmp(a[27], a[29]); cmp(a[30], a[37]); cmp(a[31], a[36]); cmp(a[32], a[39]); cmp(a[34], a[40]); cmp(a[35], a[41]); cmp(a[38], a[43]); cmp(a[42], a[44]); cmp(a[45], a[46]); cmp(a[47], a[48]); cmp(a[49], a[50]); cmp(a[51], a[53]); cmp(a[52], a[54]); cmp(a[55], a[56]); cmp(a[57], a[58]); cmp(a[59], a[60]);
@@ -1122,7 +1192,8 @@ inline constexpr void sort61(int* a) noexcept {
 }
 
 // 62 inputs, 506 CEs
-inline constexpr void sort62(int* a) noexcept {
+template <typename T>
+inline constexpr void sort62(T* a) noexcept {
     cmp(a[1], a[2]); cmp(a[3], a[10]); cmp(a[4], a[14]); cmp(a[5], a[8]); cmp(a[6], a[13]); cmp(a[7], a[12]); cmp(a[9], a[11]); cmp(a[15], a[28]); cmp(a[16], a[27]); cmp(a[17], a[30]); cmp(a[18], a[29]); cmp(a[19], a[23]); cmp(a[20], a[21]); cmp(a[22], a[26]); cmp(a[24], a[25]); cmp(a[32], a[33]); cmp(a[34], a[41]); cmp(a[35], a[45]); cmp(a[36], a[39]); cmp(a[37], a[44]); cmp(a[38], a[43]); cmp(a[40], a[42]); cmp(a[46], a[59]); cmp(a[47], a[58]); cmp(a[48], a[61]); cmp(a[49], a[60]); cmp(a[50], a[54]); cmp(a[51], a[52]); cmp(a[53], a[57]); cmp(a[55], a[56]);
     cmp(a[0], a[14]); cmp(a[1], a[5]); cmp(a[2], a[8]); cmp(a[3], a[7]); cmp(a[6], a[9]); cmp(a[10], a[12]); cmp(a[11], a[13]); cmp(a[15], a[20]); cmp(a[16], a[22]); cmp(a[17], a[24]); cmp(a[18], a[19]); cmp(a[21], a[28]); cmp(a[23], a[29]); cmp(a[25], a[30]); cmp(a[26], a[27]); cmp(a[31], a[45]); cmp(a[32], a[36]); cmp(a[33], a[39]); cmp(a[34], a[38]); cmp(a[37], a[40]); cmp(a[41], a[43]); cmp(a[42], a[44]); cmp(a[46], a[51]); cmp(a[47], a[53]); cmp(a[48], a[55]); cmp(a[49], a[50]); cmp(a[52], a[59]); cmp(a[54], a[60]); cmp(a[56], a[61]); cmp(a[57], a[58]);
     cmp(a[0], a[7]); cmp(a[1], a[6]); cmp(a[2], a[9]); cmp(a[4], a[10]); cmp(a[5], a[11]); cmp(a[8], a[13]); cmp(a[12], a[14]); cmp(a[15], a[16]); cmp(a[17], a[18]); cmp(a[19], a[20]); cmp(a[21], a[23]); cmp(a[22], a[24]); cmp(a[25], a[26]); cmp(a[27], a[28]); cmp(a[29], a[30]); cmp(a[31], a[38]); cmp(a[32], a[37]); cmp(a[33], a[40]); cmp(a[35], a[41]); cmp(a[36], a[42]); cmp(a[39], a[44]); cmp(a[43], a[45]); cmp(a[46], a[47]); cmp(a[48], a[49]); cmp(a[50], a[51]); cmp(a[52], a[54]); cmp(a[53], a[55]); cmp(a[56], a[57]); cmp(a[58], a[59]); cmp(a[60], a[61]);
@@ -1147,7 +1218,8 @@ inline constexpr void sort62(int* a) noexcept {
 }
 
 // 63 inputs, 515 CEs
-inline constexpr void sort63(int* a) noexcept {
+template <typename T>
+inline constexpr void sort63(T* a) noexcept {
     cmp(a[1], a[2]); cmp(a[3], a[10]); cmp(a[4], a[14]); cmp(a[5], a[8]); cmp(a[6], a[13]); cmp(a[7], a[12]); cmp(a[9], a[11]); cmp(a[15], a[28]); cmp(a[16], a[27]); cmp(a[17], a[30]); cmp(a[18], a[29]); cmp(a[19], a[23]); cmp(a[20], a[21]); cmp(a[22], a[26]); cmp(a[24], a[25]); cmp(a[31], a[44]); cmp(a[32], a[43]); cmp(a[33], a[46]); cmp(a[34], a[45]); cmp(a[35], a[39]); cmp(a[36], a[37]); cmp(a[38], a[42]); cmp(a[40], a[41]); cmp(a[47], a[60]); cmp(a[48], a[59]); cmp(a[49], a[62]); cmp(a[50], a[61]); cmp(a[51], a[55]); cmp(a[52], a[53]); cmp(a[54], a[58]); cmp(a[56], a[57]);
     cmp(a[0], a[14]); cmp(a[1], a[5]); cmp(a[2], a[8]); cmp(a[3], a[7]); cmp(a[6], a[9]); cmp(a[10], a[12]); cmp(a[11], a[13]); cmp(a[15], a[20]); cmp(a[16], a[22]); cmp(a[17], a[24]); cmp(a[18], a[19]); cmp(a[21], a[28]); cmp(a[23], a[29]); cmp(a[25], a[30]); cmp(a[26], a[27]); cmp(a[31], a[36]); cmp(a[32], a[38]); cmp(a[33], a[40]); cmp(a[34], a[35]); cmp(a[37], a[44]); cmp(a[39], a[45]); cmp(a[41], a[46]); cmp(a[42], a[43]); cmp(a[47], a[52]); cmp(a[48], a[54]); cmp(a[49], a[56]); cmp(a[50], a[51]); cmp(a[53], a[60]); cmp(a[55], a[61]); cmp(a[57], a[62]); cmp(a[58], a[59]);
     cmp(a[0], a[7]); cmp(a[1], a[6]); cmp(a[2], a[9]); cmp(a[4], a[10]); cmp(a[5], a[11]); cmp(a[8], a[13]); cmp(a[12], a[14]); cmp(a[15], a[16]); cmp(a[17], a[18]); cmp(a[19], a[20]); cmp(a[21], a[23]); cmp(a[22], a[24]); cmp(a[25], a[26]); cmp(a[27], a[28]); cmp(a[29], a[30]); cmp(a[31], a[32]); cmp(a[33], a[34]); cmp(a[35], a[36]); cmp(a[37], a[39]); cmp(a[38], a[40]); cmp(a[41], a[42]); cmp(a[43], a[44]); cmp(a[45], a[46]); cmp(a[47], a[48]); cmp(a[49], a[50]); cmp(a[51], a[52]); cmp(a[53], a[55]); cmp(a[54], a[56]); cmp(a[57], a[58]); cmp(a[59], a[60]); cmp(a[61], a[62]);
@@ -1172,7 +1244,8 @@ inline constexpr void sort63(int* a) noexcept {
 }
 
 // 64 inputs, 521 CEs
-inline constexpr void sort64(int* a) noexcept {
+template <typename T>
+inline constexpr void sort64(T* a) noexcept {
     cmp(a[0], a[2]); cmp(a[1], a[3]); cmp(a[4], a[6]); cmp(a[5], a[7]); cmp(a[8], a[10]); cmp(a[9], a[11]); cmp(a[12], a[14]); cmp(a[13], a[15]); cmp(a[16], a[18]); cmp(a[17], a[19]); cmp(a[20], a[22]); cmp(a[21], a[23]); cmp(a[24], a[26]); cmp(a[25], a[27]); cmp(a[28], a[30]); cmp(a[29], a[31]); cmp(a[32], a[34]); cmp(a[33], a[35]); cmp(a[36], a[38]); cmp(a[37], a[39]); cmp(a[40], a[42]); cmp(a[41], a[43]); cmp(a[44], a[46]); cmp(a[45], a[47]); cmp(a[48], a[50]); cmp(a[49], a[51]); cmp(a[52], a[54]); cmp(a[53], a[55]); cmp(a[56], a[58]); cmp(a[57], a[59]); cmp(a[60], a[62]); cmp(a[61], a[63]);
     cmp(a[0], a[1]); cmp(a[2], a[3]); cmp(a[4], a[5]); cmp(a[6], a[7]); cmp(a[8], a[9]); cmp(a[10], a[11]); cmp(a[12], a[13]); cmp(a[14], a[15]); cmp(a[16], a[17]); cmp(a[18], a[19]); cmp(a[20], a[21]); cmp(a[22], a[23]); cmp(a[24], a[25]); cmp(a[26], a[27]); cmp(a[28], a[29]); cmp(a[30], a[31]); cmp(a[32], a[33]); cmp(a[34], a[35]); cmp(a[36], a[37]); cmp(a[38], a[39]); cmp(a[40], a[41]); cmp(a[42], a[43]); cmp(a[44], a[45]); cmp(a[46], a[47]); cmp(a[48], a[49]); cmp(a[50], a[51]); cmp(a[52], a[53]); cmp(a[54], a[55]); cmp(a[56], a[57]); cmp(a[58], a[59]); cmp(a[60], a[61]); cmp(a[62], a[63]);
     cmp(a[0], a[52]); cmp(a[1], a[2]); cmp(a[3], a[55]); cmp(a[4], a[48]); cmp(a[5], a[6]); cmp(a[7], a[51]); cmp(a[8], a[60]); cmp(a[9], a[10]); cmp(a[11], a[63]); cmp(a[12], a[56]); cmp(a[13], a[14]); cmp(a[15], a[59]); cmp(a[16], a[32]); cmp(a[17], a[18]); cmp(a[19], a[35]); cmp(a[20], a[24]); cmp(a[21], a[22]); cmp(a[23], a[27]); cmp(a[25], a[26]); cmp(a[28], a[44]); cmp(a[29], a[30]); cmp(a[31], a[47]); cmp(a[33], a[34]); cmp(a[36], a[40]); cmp(a[37], a[38]); cmp(a[39], a[43]); cmp(a[41], a[42]); cmp(a[45], a[46]); cmp(a[49], a[50]); cmp(a[53], a[54]); cmp(a[57], a[58]); cmp(a[61], a[62]);
@@ -1196,7 +1269,11 @@ inline constexpr void sort64(int* a) noexcept {
     cmp(a[3], a[4]); cmp(a[7], a[8]); cmp(a[11], a[12]); cmp(a[13], a[14]); cmp(a[15], a[16]); cmp(a[17], a[18]); cmp(a[19], a[20]); cmp(a[21], a[22]); cmp(a[23], a[24]); cmp(a[25], a[26]); cmp(a[27], a[28]); cmp(a[29], a[30]); cmp(a[31], a[32]); cmp(a[33], a[34]); cmp(a[35], a[36]); cmp(a[37], a[38]); cmp(a[39], a[40]); cmp(a[41], a[42]); cmp(a[43], a[44]); cmp(a[45], a[46]); cmp(a[47], a[48]); cmp(a[49], a[50]); cmp(a[51], a[52]); cmp(a[55], a[56]); cmp(a[59], a[60]);
 }
 
-inline constexpr void network_sort(int* a, size_t& len) noexcept {
+// Диспетчер: для длины до 64 выбирает готовую сеть.
+// len передаётся по значению -- раньше была неконстантная ссылка, из-за
+// которой нельзя было вызвать от временного значения вроде last - first.
+template <typename T>
+inline constexpr void network_sort(T* a, size_t len) noexcept {
     switch(len){
         case 0: case 1: return;
         case 2: cmp(a[0], a[1]); return;

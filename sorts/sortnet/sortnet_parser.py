@@ -53,15 +53,21 @@ def generate_cpp(networks: dict[int, tuple[int, list[list[tuple[int, int]]]]]) -
     lines.append("// Auto-generated sorting networks")
     lines.append("// Source: https://bertdobbelaere.github.io/sorting_networks.html")
     lines.append("")
-    lines.append("inline constexpr void cmp(int& a, int& b) noexcept {")
-    lines.append("    if (a > b) { int t = a; a = b; b = t; }")
+    lines.append("template <typename T>")
+    lines.append("inline constexpr void cmp(T& a, T& b) noexcept {")
+    lines.append("    const bool ordered = !(b < a);")
+    lines.append("    const T lo = ordered ? a : b;")
+    lines.append("    const T hi = ordered ? b : a;")
+    lines.append("    a = lo;")
+    lines.append("    b = hi;")
     lines.append("}")
     lines.append("")
 
     for n in sorted(networks):
         ces, layers = networks[n]
         lines.append(f"// {n} inputs, {ces} CEs")
-        lines.append(f"inline constexpr void sort{n}(int* a) noexcept {{")
+        lines.append("template <typename T>")
+        lines.append(f"inline constexpr void sort{n}(T* a) noexcept {{")
 
         for layer in layers:
             cmps = "; ".join(f"cmp(a[{i}], a[{j}])" for i, j in layer)
